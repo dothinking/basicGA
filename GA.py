@@ -116,11 +116,24 @@ class Population():
 
 		return new_individual_a, new_individual_b
 
-	def select(self):
+	def _select_by_roulette(self):
 		'''select individuals by Roulette'''
 		probabilities = np.cumsum(self.fitness)
-		selected_individuals = [self._individuals[np.sum(np.random.rand()>=probabilities)] for i in range(self._size)]
-		self._individuals = selected_individuals
+		return [self._individuals[np.sum(np.random.rand()>=probabilities)] for i in range(self._size)]
+
+	def _select_by_elites(self):
+		pass
+
+	def select(self, sel_type='roulette'):
+		'''select individuals'''
+
+		methods = {
+			'roulette': self._select_by_roulette,
+			'elites'  : self._select_by_elites
+		}
+		select_method = methods.get(sel_type, self._select_by_roulette)
+		
+		self._individuals = select_method()
 		self._evaluation = None # reset evaluation
 
 	def crossover(self, rate, alpha):
@@ -191,10 +204,8 @@ class GA():
 			self._population.mutate(np.random.randint(self._param['var_dim'])+1, self._param['mutation_rate'], rate)
 
 			# evaluation
-			# individual, val = self._population.best
-			# print('----------Generation {0}----------'.format(current_gen))
-			# print('Best individual: {0}'.format(individual.chrom))
-			# print('Output: {0}'.format(val))
+			_, val = self._population.best
+			print('Generation {0}: {1}'.format(current_gen, val))
 
 			if self._population.convergent():
 				break
@@ -211,9 +222,9 @@ class GA():
 
 if __name__ == '__main__':
 
-	# schaffer function
-	# sol: x=[0,0], min=0
-	schaffer = lambda x: 0.5 + (math.sin((x[0]**2+x[1]**2)**0.5)**2-0.5) / (1.0+0.001*(x[0]**2+x[1]**2))**2
+	# schaffer-N4
+	# sol: x=[0,1.25313], min=0.292579
+	schaffer_n4 = lambda x: 0.5 + (math.cos(math.sin(abs(x[0]**2-x[1]**2)))**2-0.5) / (1.0+0.001*(x[0]**2+x[1]**2))**2
 
 	kw = {
 		'lbound': [-10, -10],
@@ -224,5 +235,5 @@ if __name__ == '__main__':
 		'mutation_rate'	: 0.1,
 		'crossover_alpha': 0.25
 	}
-	g = GA(schaffer, 2, **kw)
+	g = GA(schaffer_n4, 2, **kw)
 	g.solve()
