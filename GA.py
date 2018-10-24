@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class Individual():
 	'''individual of population'''
 	def __init__(self, dim, lbound, ubound):
@@ -224,9 +225,9 @@ class GA():
 		print('Best individual: {0}'.format(individual.chrom))
 		print('Output: {0}'.format(val))
 
-		return individual, val
-
-
+		# return individual, val
+		return self._population
+		
 
 if __name__ == '__main__':
 

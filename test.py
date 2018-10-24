@@ -1,6 +1,15 @@
-from GA import GA
+# This import registers the 3D projection, but is otherwise unused.
+from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
+
+import matplotlib.pyplot as plt
+from matplotlib import cm
+from matplotlib.ticker import LinearLocator, LogLocator, FormatStrFormatter
+
 import math
 import numpy as np
+
+from GA import GA
+
 
 # ------------------
 # testing functions
@@ -17,7 +26,7 @@ schaffer = lambda x: 0.5 + (math.sin((x[0]**2+x[1]**2)**0.5)**2-0.5) / (1.0+0.00
 
 # schaffer-N4
 # sol: x=[0,1.25313], min=0.292579
-schaffer_n4 = lambda x: 0.5 + (math.cos(math.sin(abs(x[0]**2-x[1]**2)))**2-0.5) / (1.0+0.001*(x[0]**2+x[1]**2))**2
+schaffer_n4 = lambda x: 0.5 + (np.cos(np.sin(np.abs(x[0]**2-x[1]**2)))**2-0.5) / (1.0+0.001*(x[0]**2+x[1]**2))**2
 
 # shubert
 # sol: x=[], min=
@@ -32,36 +41,66 @@ def shubert(x):
 rosenbrock = lambda x: 100*(x[1]-x[0]**2)**2+(1-x[0])**2
 
 # ------------------
+# plots
+# ------------------
+def surface_plot(f, lbound, ubound, n=200):
+	fig, ax = plt.subplots()
+
+	# Make data.
+	X = np.linspace(lbound[0], ubound[0], n)
+	Y = np.linspace(lbound[1], ubound[1], n)
+	X, Y = np.meshgrid(X, Y)
+	Z = f([X,Y])
+
+	# Plot the surface.
+	# res = ax.plot_surface(X, Y, Z, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+	res = ax.contourf(X, Y, Z, cmap=cm.PuBu_r)
+
+	# Add a color bar which maps values to colors.
+	fig.colorbar(res, shrink=0.5, aspect=10)
+
+	return ax
+
+
+# ------------------
 # test GA
 # ------------------
 def test(obj, sol):
 	# GA res
 	kw = {
-		'lbound': [-100, -100],
-		'ubound': [100, 100],
+		'lbound': [-10, -10],
+		'ubound': [10, 10],
 		'size'	: 195,
 		'max_generation': 30,
 		'fitness': lambda x: np.exp(-x),
-		# 'selection_mode': 'elite',
-		'crossover_rate': 0.85,		
-		'crossover_alpha': 0.75,
-		'mutation_rate'	: 0.02
+		'selection_mode': 'elite',
+		'crossover_rate': 0.9,		
+		'crossover_alpha': 0.01,
+		'mutation_rate'	: 0.1,
 	}
 	g = GA(obj, 2, **kw)
-	_,res = g.solve()
+	P = g.solve()
 
 	# theoretical res
+	res = P.best[1]
 	res0 = obj(sol)
 	print('\nGlobal solution input: {0}'.format(sol))
 	print('Global solution output: {0}\n'.format(res0))
 
-	print('Relative error: {0} %'.format((res-res0)/res0*100))
+	# print('Relative error: {0} %'.format((res-res0)/res0*100))
+
+	# plots
+	ax = surface_plot(schaffer_n4, kw['lbound'], kw['ubound'])
+	x = [I.chrom[0] for I in P.individuals]
+	y = [I.chrom[1] for I in P.individuals]
+	ax.scatter(x,y,c='r',marker='o')
+	plt.show()
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':	
 
 	# test(f2, [0,0])
 	# test(schaffer, [0,0])
-	test(schaffer_n4, [0,1.25313])
+	# test(schaffer_n4, [0,1.25313])
 	# test(schaffer, [0,0])
-	# test(rosenbrock, [1,1])
+	test(rosenbrock, [1,1])
