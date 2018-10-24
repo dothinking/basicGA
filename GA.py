@@ -1,5 +1,4 @@
 import numpy as np
-import math
 
 class Individual():
 	'''individual of population'''
@@ -51,15 +50,21 @@ class Individual():
 
 class Population():
 	'''collection of individuals'''
-	def __init__(self, fun_evaluation, size=50):
+	def __init__(self, fun_evaluation, fun_fitness, size=50):
+		'''
+		fun_evaluation: objective function with x, e.g. lambda x: x[0]**2+x[1]
+		fun_fitness   : definition to evaluate the objective values
+		size          : count of individuals
+		'''
 		self._fun_evaluation = fun_evaluation
+		self._fun_fitness = fun_fitness
 		self._size = size
 		self._individuals = None
 		self._evaluation = None
 
 	def initialize(self, dim, lbound, ubound):
 		'''initialization for next generation'''
-		self._individuals = [Individual(dim, lbound, ubound) for i in range(self._size)]
+		self._individuals = np.array([Individual(dim, lbound, ubound) for i in range(self._size)])
 		for individual in self._individuals:
 			individual.initialize()	
 
@@ -79,7 +84,8 @@ class Population():
 		we're trying to minimize the evaluation value,
 		so the fitness is defined as: sum(abs(V))-Vi
 		'''
-		fitness = np.sum(np.abs(self.evaluation)) - self.evaluation
+		# fitness = np.sum(np.abs(self.evaluation)) - self.evaluation
+		fitness = self._fun_fitness(self.evaluation)
 		return fitness/np.sum(fitness)
 
 	@property
@@ -90,15 +96,23 @@ class Population():
 	def convergent(self, tol=1e-6):
 		'''max deviation of all individuals'''
 		max_eval, min_eval = np.max(self.evaluation), np.min(self.evaluation)
-		return max_eval-min_eval <= tol
-	
+		return max_eval-min_eval <= tol	
+
+	def _select_by_roulette(self):
+		'''select individuals by Roulette'''
+		return np.random.choice(self._individuals, self._size, p=self.fitness)
+
+	def _select_by_elite(self):
+		pos = np.argsort(self.fitness)
+		elite_pos = pos[int(self._size/2):]		
+		return np.random.choice(self._individuals[elite_pos], self._size)
 
 	@staticmethod
-	def cross_individuals(individual_a, individual_b, alpha=0.5):
+	def _cross_individuals(individual_a, individual_b, alpha):
 		'''
 		generate two child individuals based on parent individuals:
 		new values are calculated at random positions
-		alpha: linear ratio to cross two parent valus
+		alpha: linear ratio to cross two genes, exchange two genes if alpha is 0.0
 		'''
 		# random positions to be crossed
 		pos = np.random.rand(individual_a.dimension) <= 0.5
@@ -116,20 +130,12 @@ class Population():
 
 		return new_individual_a, new_individual_b
 
-	def _select_by_roulette(self):
-		'''select individuals by Roulette'''
-		probabilities = np.cumsum(self.fitness)
-		return [self._individuals[np.sum(np.random.rand()>=probabilities)] for i in range(self._size)]
-
-	def _select_by_elites(self):
-		pass
-
 	def select(self, sel_type='roulette'):
 		'''select individuals'''
 
 		methods = {
 			'roulette': self._select_by_roulette,
-			'elites'  : self._select_by_elites
+			'elite'  : self._select_by_elite
 		}
 		select_method = methods.get(sel_type, self._select_by_roulette)
 		
@@ -142,13 +148,13 @@ class Population():
 		random_population = np.random.permutation(self._individuals) # random order
 		for individual_a, individual_b in zip(self._individuals, random_population):
 			if np.random.rand() <= rate:
-				child_individuals = self.cross_individuals(individual_a, individual_b, alpha)
+				child_individuals = self._cross_individuals(individual_a, individual_b, alpha)
 				new_individuals.extend(child_individuals)
 			else:
 				new_individuals.append(individual_a)
 				new_individuals.append(individual_b)
 
-		self._individuals = np.random.choice(new_individuals, self._size, replace=False).tolist()
+		self._individuals = np.random.choice(new_individuals, self._size, replace=False)
 		self._evaluation = None # reset evaluation
 
 	def mutate(self, num, rate, alpha):
@@ -181,16 +187,18 @@ class GA():
 			'ubound': [1e9] * dimention,
 			'size'	: 200,
 			'max_generation': 10,
-			'crossover_rate': 0.9,
-			'mutation_rate'	: 0.08,
-			'crossover_alpha': 0.75
+			'fitness' 		: lambda x: np.sum(np.abs(x))-x,
+			'selection_mode': 'roulette',
+			'crossover_rate': 0.9,			
+			'crossover_alpha': 0.0,
+			'mutation_rate'	: 0.08
 		}
 		self._param.update(kw)		
 
 		# initialize population
 		lbound = np.array(self._param['lbound'])
 		ubound = np.array(self._param['ubound'])
-		self._population = Population(fun_evaluation, self._param['size'])
+		self._population = Population(fun_evaluation, self._param['fitness'], self._param['size'])
 		self._population.initialize(dimention, lbound, ubound)
 
 
@@ -199,7 +207,7 @@ class GA():
 		for current_gen in range(1, self._param['max_generation']+1):
 			# GA operations
 			rate = 1.0 - np.random.rand()**(1.0-current_gen/self._param['max_generation'])
-			self._population.select()
+			self._population.select(self._param['selection_mode'])
 			self._population.crossover(self._param['crossover_rate'], self._param['crossover_alpha'])
 			self._population.mutate(np.random.randint(self._param['var_dim'])+1, self._param['mutation_rate'], rate)
 
@@ -222,18 +230,23 @@ class GA():
 
 if __name__ == '__main__':
 
+	import math
+
 	# schaffer-N4
 	# sol: x=[0,1.25313], min=0.292579
 	schaffer_n4 = lambda x: 0.5 + (math.cos(math.sin(abs(x[0]**2-x[1]**2)))**2-0.5) / (1.0+0.001*(x[0]**2+x[1]**2))**2
 
 	kw = {
-		'lbound': [-10, -10],
-		'ubound': [10, 10],
-		'size'	: 200,
-		'max_generation': 20,
-		'crossover_rate': 0.9,
-		'mutation_rate'	: 0.1,
-		'crossover_alpha': 0.25
+		'lbound': [-100, -100],
+		'ubound': [100, 100],
+		'size'	: 195,
+		'max_generation': 30,
+		'fitness': lambda x: np.exp(-x),
+		'selection_mode': 'elite',
+		'crossover_rate': 0.85,		
+		'crossover_alpha': 0.75,
+		'mutation_rate'	: 0.02
 	}
+
 	g = GA(schaffer_n4, 2, **kw)
 	g.solve()
