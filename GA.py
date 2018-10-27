@@ -16,16 +16,17 @@ class GA():
 
 		# default parameters
 		self._param = {
-			'var_dim': dimention,
-			'lbound': [-1e9] * dimention,
-			'ubound': [1e9] * dimention,
-			'size'	: 32,
-			'max_generation': 100,
-			'fitness' 		: lambda x: np.sum(np.abs(x))-x,
-			'selection_mode': 'roulette',
-			'crossover_rate': 0.9,			
-			'crossover_alpha': 0.0,
-			'mutation_rate'	: 0.08
+			'var_dim' 				: dimention,
+			'lbound'				: [-1e9] * dimention,
+			'ubound'				: [1e9] * dimention,
+			'size'					: 32,
+			'max_generation'		: 100,
+			'fitness' 				: lambda x: np.sum(np.abs(x))-x,
+			'selection_mode'		: 'roulette',
+			'crossover_rate'		: 0.9,			
+			'crossover_alpha'		: 0.0,
+			'crossover_rate_range'	: [0.5, 0.9],
+			'mutation_rate'			: 0.08
 		}
 		self._param.update(kw)		
 
@@ -69,10 +70,16 @@ class GA():
 		'''Adaptive Genetic Algorithm
 		'''		
 		for current_gen in range(1, self._param['max_generation']+1):
-			# GA operations
+
+			# adaptive 1: fitness function for selection evaluation
+			f = lambda x: np.exp(x/0.99**(current_gen-1))
+			self._population.select(self._param['selection_mode'], f)
+
+			# adaptive 2: crossover rate
+			self._population.crossover(self._param['crossover_rate_range'], self._param['crossover_alpha'])
+
+			# adaptive 3: mutation rate
 			rate = 1.0 - np.random.rand()**(1.0-current_gen/self._param['max_generation'])
-			self._population.select(self._param['selection_mode'])
-			self._population.crossover(self._param['crossover_rate'], self._param['crossover_alpha'])
 			self._population.mutate(self._param['var_dim'], self._param['mutation_rate'], rate)
 
 

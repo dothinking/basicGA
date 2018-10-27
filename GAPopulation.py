@@ -34,15 +34,12 @@ class Population():
 		'''get best individual according to evaluation value '''
 		# evaluate first and collect evaluations
 		self._evaluate()
-		evaluation = []
-		for I in self._individuals:
-			evaluation.append(I.evaluation)
 
 		# get the minimum position
-		pos = np.argmin(np.array(evaluation))
+		pos = np.argmin([I.evaluation for I in self._individuals])
 		return self._individuals[pos]
 
-	def _evaluate(self):
+	def _evaluate(self, adaptive=None):
 		# calculate values according to the objective function
 		evaluation = np.array([self._fun_evaluation(I.chrom) for I in self._individuals])
 
@@ -50,6 +47,10 @@ class Population():
 		# sum(abs(V))-Vi by default
 		fitness = self._fun_fitness(evaluation)		
 		fitness = fitness/np.sum(fitness) # normalize
+
+		if adaptive:
+			fitness = adaptive(fitness)
+			fitness = fitness/np.sum(fitness) # normalize
 		
 		# set attributes for each individual	
 		for I,e,f in zip(self._individuals, evaluation, fitness):
@@ -96,11 +97,11 @@ class Population():
 
 		return new_individual_a, new_individual_b
 
-	def select(self, method='roulette'):
+	def select(self, method='roulette', adaptive=None):
 		'''select individuals'''
 
 		# evaluate each individual first
-		fitness = self._evaluate()
+		fitness = self._evaluate(adaptive)
 
 		# selection mode
 		methods = {
@@ -114,14 +115,34 @@ class Population():
 
 	def crossover(self, rate, alpha):
 		'''crossover operation:
-		rate: propability of crossover. adaptive rate for each individual if rate=-1
+		rate: propability of crossover. adaptive rate when it is a list, e.g. [0.6,0.9]
+				if f<f_avg then rate = range_max
+				if f>=f_avg then rate = range_max-(range_max-range_min)*(f-f_avg)/(f_max-f_avg)
+				where f=max(individual_a, individual_b)
 		alpha: factor for crossing two chroms
 		'''
+		# adaptive rate
+		if isinstance(rate, list):
+			fitness = [I.fitness for I in self._individuals]
+			fit_max, fit_avg = np.max(fitness), np.mean(fitness)
+
 		new_individuals = []		
 		random_population = np.random.permutation(self._individuals) # random order
 		num = int(self._size/2.0)+1
+
 		for individual_a, individual_b in zip(self._individuals[0:num+1], random_population[0:num+1]):
-			if np.random.rand() <= rate:
+			
+			# adaptive rate
+			if isinstance(rate, list):
+				fit = max(individual_a.fitness, individual_b.fitness)
+				if fit_max-fit_avg:
+					i_rate = rate[1] if fit<fit_avg else rate[1] - (rate[1]-rate[0])*(fit-fit_avg)/(fit_max-fit_avg)
+				else:
+					i_rate = (rate[0]+rate[1])/2.0
+			else:
+				i_rate = rate
+
+			if np.random.rand() <= i_rate:
 				child_individuals = self._cross_individuals(individual_a, individual_b, alpha)
 				new_individuals.extend(child_individuals)
 			else:

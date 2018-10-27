@@ -61,9 +61,9 @@ def test(obj, sol):
 	kw = {
 		'lbound': [-10, -10],
 		'ubound': [10, 10],
-		'size'	: 320,
+		'size'	: 50,
 		'max_generation': 50,
-		# 'fitness': lambda x: np.exp(-x),
+		'fitness': lambda x: np.exp(-x),
 		# 'fitness': lambda x: 1.0/(1+x),
 		'selection_mode': 'elite',
 		'crossover_rate': 0.8,		
@@ -98,6 +98,6 @@ if __name__ == '__main__':
 	# test(f1, [0,0])
 	# test(f2, [0,0])
 	# test(schaffer, [0,0])
-	# test(schaffer_n4, [0,1.25313])
+	test(schaffer_n4, [0,1.25313])
 	# test(shubert, [0,0])
-	test(rosenbrock, [1,1])
+	# test(rosenbrock, [1,1])
