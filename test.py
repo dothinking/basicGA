@@ -9,7 +9,7 @@ import numpy as np
 
 from GA import GA
 
-
+import time
 # ------------------
 # testing functions
 # ------------------
@@ -32,6 +32,7 @@ schaffer_n4 = lambda x: 0.5 + (np.cos(np.sin(np.abs(x[0]**2-x[1]**2)))**2-0.5) /
 def shubert(x):
 	a = [i*np.cos((i+1)*x[0]+i) for i in range(1,6)]	 
 	b = [i*np.cos((i+1)*x[1]+i) for i in range(1,6)]
+	time.sleep(0.00005)
 	return sum(a) * sum(b)
 
 
@@ -57,38 +58,36 @@ def surface_plot(f, lbound, ubound, ax, n=200):
 # test GA
 # ------------------
 def test(obj, sol):
-	# GA res
-	kw = {
-		'lbound': [-10, -10],
-		'ubound': [10, 10],
-		'size'	: 50,
-		'max_generation': 50,
-		'fitness': lambda x: np.exp(-x),
-		# 'fitness': lambda x: 1.0/(1+x),
-		'selection_mode': 'elite',
-		'crossover_rate': 0.8,		
-		'crossover_alpha': 0.1,
-		'mutation_rate'	: 0.15,
-	}
 
 	# theoretical res
 	print('\nGlobal solution input: {0}'.format(sol))
 	print('Global solution output: {0}\n'.format(obj(sol)))
 
-	modes = ['SGA', 'EGA', 'AGA']
-	num = int(len(modes)**0.5)+1
-	G = GA(obj, 2, **kw)
-	for i, mode in enumerate(modes, start=1):
-		I = G.solve(mode)
+	# GA res
+	kw = {
+		'size'	: 100,
+		'max_generation': 50,
+		# 'fitness': lambda x: np.exp(-x),
+		'selection_mode': 'elite',
+		# 'selection_elite': False,
+		'crossover_rate': [0.5, 0.9],
+		# 'crossover_rate': 0.8,
+		'crossover_alpha': 0.5,
+		'mutation_rate'	: 0.08
+	}
+	lb = [-10,-10]
+	ub = [10, 10]
+	g = GA(obj, 2, lb, ub, **kw)
+	I = g.solve()
 
-		print('\n{0} solution input: {1}'.format(mode, I.chrom))
-		print('{0} solution output: {1}\n'.format(mode, I.evaluation))
+	print('\nGA solution input: {0}'.format(I.chrom))
+	print('GA solution output: {0}\n'.format(I.evaluation))
 
-		# plots
-		ax = plt.subplot('{0}{1}{2}'.format(num, num, i))
-		surface_plot(obj, kw['lbound'], kw['ubound'], ax)
-		ax.scatter(I.chrom[0], I.chrom[1], c='r', marker='o')
-		ax.scatter(sol[0], sol[1], c='b', marker='^')
+	# plots
+	ax = plt.subplot(111)
+	surface_plot(obj, lb, ub, ax)
+	ax.scatter(I.chrom[0], I.chrom[1], c='r', marker='o')
+	ax.scatter(sol[0], sol[1], c='b', marker='^')
 
 	plt.show()
 
@@ -98,6 +97,6 @@ if __name__ == '__main__':
 	# test(f1, [0,0])
 	# test(f2, [0,0])
 	# test(schaffer, [0,0])
-	test(schaffer_n4, [0,1.25313])
+	# test(schaffer_n4, [0,1.25313])
 	# test(shubert, [0,0])
-	# test(rosenbrock, [1,1])
+	test(rosenbrock, [1,1])

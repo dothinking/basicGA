@@ -49,6 +49,8 @@ class Individual():
 				self._chrom[pos] -= (self._chrom[pos]-self._lbound[pos])*alpha
 			else:
 				self._chrom[pos] += (self._ubound[pos]-self._chrom[pos])*alpha
+				
+		self.evaluation = None # reset evaluation
 		
 
 if __name__ == '__main__':

@@ -5,6 +5,7 @@ import numpy as np
 import copy
 from GAIndividual import Individual
 
+
 class Population():
 	'''collection of individuals'''
 	def __init__(self, fun_evaluation, fun_fitness, size=50):
@@ -39,17 +40,23 @@ class Population():
 		pos = np.argmin([I.evaluation for I in self._individuals])
 		return self._individuals[pos]
 
-	def _evaluate(self, adaptive=None):
-		# calculate values according to the objective function
-		evaluation = np.array([self._fun_evaluation(I.chrom) for I in self._individuals])
+	def _evaluate(self, fun_adaptive=None):
+		'''calculate objectibe value and fitness for each individual
+		'''
+
+		# get the value directly if it has been calculated before
+		evaluation = np.array([self._fun_evaluation(I.chrom) if I.evaluation is None else I.evaluation for I in self._individuals])
 
 		# calculate fitness according to fitness function
 		# sum(abs(V))-Vi by default
 		fitness = self._fun_fitness(evaluation)		
 		fitness = fitness/np.sum(fitness) # normalize
 
-		if adaptive:
-			fitness = adaptive(fitness)
+		# the difference of fitness decrease with the increase of generation,
+		# which could not show the competition of domanit individual
+		# so a adaptive function is used to enlarge the deviation
+		if fun_adaptive:
+			fitness = fun_adaptive(fitness)
 			fitness = fitness/np.sum(fitness) # normalize
 		
 		# set attributes for each individual	
@@ -97,11 +104,16 @@ class Population():
 
 		return new_individual_a, new_individual_b
 
-	def select(self, method='roulette', adaptive=None):
-		'''select individuals'''
+	def select(self, method='roulette', fun_adaptive=None):
+		'''
+		select individuals:
+			method: a) roulette based on probability
+					b) elite based on sorting evaluation
+			fun_adaptive
+		'''
 
 		# evaluate each individual first
-		fitness = self._evaluate(adaptive)
+		fitness = self._evaluate(fun_adaptive)
 
 		# selection mode
 		methods = {
@@ -114,12 +126,13 @@ class Population():
 		self._individuals = np.array([copy.deepcopy(I) for I in selected_individuals])
 
 	def crossover(self, rate, alpha):
-		'''crossover operation:
-		rate: propability of crossover. adaptive rate when it is a list, e.g. [0.6,0.9]
-				if f<f_avg then rate = range_max
-				if f>=f_avg then rate = range_max-(range_max-range_min)*(f-f_avg)/(f_max-f_avg)
-				where f=max(individual_a, individual_b)
-		alpha: factor for crossing two chroms
+		'''
+		crossover operation:
+			rate: propability of crossover. adaptive rate when it is a list, e.g. [0.6,0.9]
+					if f<f_avg then rate = range_max
+					if f>=f_avg then rate = range_max-(range_max-range_min)*(f-f_avg)/(f_max-f_avg)
+					where f=max(individual_a, individual_b)
+			alpha: factor for crossing two chroms
 		'''
 		# adaptive rate
 		if isinstance(rate, list):
@@ -142,6 +155,7 @@ class Population():
 			else:
 				i_rate = rate
 
+			# crossover
 			if np.random.rand() <= i_rate:
 				child_individuals = self._cross_individuals(individual_a, individual_b, alpha)
 				new_individuals.extend(child_individuals)
@@ -154,9 +168,9 @@ class Population():
 	def mutate(self, num, rate, alpha):
 		'''
 		mutation operation:
-		num: count of mutating gene
-		rate: propability of mutation. adaptive if rate=-1
-		alpha: mutating magnitude
+			num: count of mutating gene
+			rate: propability of mutation
+			alpha: mutating magnitude
 		'''
 		for individual in self._individuals:
 			if np.random.rand() <= rate:
