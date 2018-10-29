@@ -8,8 +8,12 @@ from matplotlib.ticker import LinearLocator, LogLocator, FormatStrFormatter
 import numpy as np
 
 from GA import GA
+from GAComponents import Individual, Population
+from GAOperators import RouletteWheelSelection, RankingSelection, Crossover, Mutation
 
 import time
+
+
 # ------------------
 # testing functions
 # ------------------
@@ -40,6 +44,7 @@ def shubert(x):
 # sol: x=[1,1], min=0
 rosenbrock = lambda x: 100*(x[1]-x[0]**2)**2+(1-x[0])**2
 
+
 # ------------------
 # plots
 # ------------------
@@ -54,6 +59,7 @@ def surface_plot(f, lbound, ubound, ax, n=200):
 	# res = ax.plot_surface(X, Y, Z, cmap=cm.coolwarm, linewidth=0, antialiased=False)
 	ax.contourf(X, Y, Z, cmap=cm.PuBu_r)
 
+
 # ------------------
 # test GA
 # ------------------
@@ -64,29 +70,25 @@ def test(obj, sol):
 	print('Global solution output: {0}\n'.format(obj(sol)))
 
 	# GA res
-	kw = {
-		'size'	: 100,
-		'max_generation': 50,
-		# 'fitness': lambda x: np.exp(-x),
-		'selection_mode': 'elite',
-		# 'selection_elite': False,
-		'crossover_rate': [0.5, 0.9],
-		# 'crossover_rate': 0.8,
-		'crossover_alpha': 0.5,
-		'mutation_rate'	: 0.08
-	}
-	lb = [-10,-10]
-	ub = [10, 10]
-	g = GA(obj, 2, lb, ub, **kw)
-	I = g.solve()
+	ranges = [(-10, 10)] * 2
+	I = Individual(ranges)
+	P = Population(I, 100)
+	S1 = RouletteWheelSelection()
+	S2 = RankingSelection(0.33)
+	C = Crossover([0.5,0.9], 0.5)
+	M = Mutation(0.08)
 
-	print('\nGA solution input: {0}'.format(I.chrom))
-	print('GA solution output: {0}\n'.format(I.evaluation))
+	g = GA(P, S2, C, M, lambda x:np.exp(-x))	
+	res = g.run(obj, 50)
+
+	print('\nGA solution input: {0}'.format(res.solution))
+	print('GA solution output: {0}\n'.format(res.evaluation))
 
 	# plots
+	lb, ub = [-10,-10], [10, 10]
 	ax = plt.subplot(111)
 	surface_plot(obj, lb, ub, ax)
-	ax.scatter(I.chrom[0], I.chrom[1], c='r', marker='o')
+	ax.scatter(res.solution[0], res.solution[1], c='r', marker='o')
 	ax.scatter(sol[0], sol[1], c='b', marker='^')
 
 	plt.show()
@@ -94,9 +96,9 @@ def test(obj, sol):
 
 if __name__ == '__main__':	
 
-	# test(f1, [0,0])
-	# test(f2, [0,0])
-	# test(schaffer, [0,0])
-	# test(schaffer_n4, [0,1.25313])
-	# test(shubert, [0,0])
+	test(f1, [0,0])
+	test(f2, [0,0])
+	test(schaffer, [0,0])
+	test(schaffer_n4, [0,1.25313])
+	test(shubert, [0,0])
 	test(rosenbrock, [1,1])
