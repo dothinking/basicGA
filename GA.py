@@ -7,7 +7,7 @@ import copy
 
 class GA():
 	'''Simple Genetic Algorithm'''
-	def __init__(self, population, selection, crossover, mutation, fun_fitness=lambda x: np.sum(np.abs(x))-x):
+	def __init__(self, population, selection, crossover, mutation, fun_fitness=lambda x:np.arctan(-x)+np.pi):
 		'''
 		fun_fitness: fitness based on objective values. minimize the objective by default
 		'''
@@ -33,7 +33,8 @@ class GA():
 		for n in range(1, gen+1):
 
 			# adaptive 1: fitness function for selection evaluation
-			f = (lambda x: np.exp(x/0.99**(n-1))) if adaptive else None
+			m = n if n<100 else 100
+			f = (lambda x: np.exp(x/0.99**m)) if adaptive else None
 			fitness, _ = self.population.fitness(fun_evaluation, self.fun_fitness, f)
 			self.selection.select(self.population, fitness)
 
@@ -65,17 +66,17 @@ if __name__ == '__main__':
 	# sol: x=[0,1.25313], min=0.292579
 	schaffer_n4 = lambda x: 0.5 + (np.cos(np.sin(abs(x[0]**2-x[1]**2)))**2-0.5) / (1.0+0.001*(x[0]**2+x[1]**2))**2
 
-	ranges = [(-10, 10)] * 2
+	ranges = [(-100, 100)] * 2
 
 	I = Individual(ranges)
 	P = Population(I, 50)
 	SRW = RouletteWheelSelection()
 	SR = RankingSelection(0.5)
 	C = Crossover([0.5, 0.9], 0.5)
-	M = Mutation(0.08)
+	M = Mutation(0.12)
 
 	g = GA(P, SR, C, M)
-	res = g.run(schaffer_n4, 100)	
+	res = g.run(schaffer_n4, 800)	
 
 	x = [0,1.25313] 
 	print('{0} : {1}'.format(res.evaluation, res.solution))

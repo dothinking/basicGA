@@ -3,6 +3,7 @@
 #----------------------------------------------------------
 import numpy as np
 
+
 class Individual:
 	'''individual of population'''
 	def __init__(self, ranges):
@@ -45,6 +46,7 @@ class Population:
 		self.size = size
 		self.individuals = None
 
+
 	def initialize(self):
 		'''initialization for next generation'''
 		IndvClass = self.individual.__class__
@@ -80,21 +82,24 @@ class Population:
 			fitness = fun_adaptive(fitness)
 			fitness = fitness/np.sum(fitness) # normalize
 		
-		# set attributes for each individual	
+		# set attributes for each individual
+
 		for I, e, f in zip(self.individuals, evaluation, fitness):
 			I.evaluation = e
 			I.fitness = f
 
 		return fitness, evaluation
-		
+
 
 if __name__ == '__main__':
 
 	ranges = [(-10,10)] * 3
 	obj = lambda x: x[0]+x[1]**2+x[2]**3
+	fitness = lambda x: np.exp(-x)
+	
 
 	I = Individual(ranges)
-	P = Population(I, 10)
+	P = Population(I, 100)	
 	P.initialize()
 
-	print(P.best(obj).solution)
+	print(P.best(obj, fitness).solution)

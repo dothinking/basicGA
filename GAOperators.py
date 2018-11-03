@@ -70,8 +70,9 @@ class Crossover:
 		pos = np.random.rand(individual_a.dimension) <= 0.5
 
 		# cross value
-		new_value_a = individual_a.solution*pos*alpha + individual_b.solution*pos*(1-alpha)
-		new_value_b = individual_a.solution*pos*(1-alpha) + individual_b.solution*pos*alpha
+		temp = (individual_b.solution-individual_a.solution)*pos*(1-alpha)
+		new_value_a = individual_a.solution + temp
+		new_value_b = individual_b.solution - temp
 
 		# return new individuals
 		new_individual_a = Individual(individual_a.ranges)
