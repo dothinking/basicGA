@@ -1,1 +1,0 @@
-practise Generic Algorithm in Python
