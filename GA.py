@@ -59,7 +59,7 @@ class GA():
 if __name__ == '__main__':
 
 	from GAComponents import Individual, Population
-	from GAOperators import RouletteWheelSelection, RankingSelection, Crossover, Mutation
+	from GAOperators import RouletteWheelSelection, LinearRankingSelection, Crossover, Mutation
 
 	# schaffer-N4
 	# sol: x=[0,1.25313], min=0.292579
@@ -70,6 +70,7 @@ if __name__ == '__main__':
 	I = Individual(ranges)
 	P = Population(I, 50)
 	S = RouletteWheelSelection()
+	SL = LinearRankingSelection()
 	C = Crossover([0.5, 0.9], 0.5)
 	M = Mutation(0.12)
 

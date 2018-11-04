@@ -2,7 +2,7 @@
 
 - single-objective minimization
 - elitist preservation to improve Simple GA
-- adaptive crossover propobility
+- adaptive crossover probability
 - based on Numpy
 
 ## import modules

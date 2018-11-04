@@ -1,5 +1,5 @@
 from GAComponents import Individual, Population
-from GAOperators import RouletteWheelSelection, Crossover, Mutation
+from GAOperators import RouletteWheelSelection, LinearRankingSelection, Crossover, Mutation
 from GA import GA
 from TestFun import *
 import time
@@ -15,13 +15,14 @@ def test(FUN):
 	# GA process	
 	I = Individual(f.ranges)
 	P = Population(I, 50)
-	S = RouletteWheelSelection()
+	R = RouletteWheelSelection()
+	L = LinearRankingSelection(99)
 	C = Crossover([0.6,0.9], 0.55)
-	M = Mutation(0.1)
-	g = GA(P, S, C, M)
+	M = Mutation(0.2)
+	g = GA(P, L, C, M)
 
 	# solve
-	res = g.run(f.objective,500)
+	res = g.run(f.objective, 500)
 
 	# theoretical result
 	print('---TEST FUNCTION: {0}---'.format(FUN.__name__))
@@ -36,6 +37,6 @@ def test(FUN):
 
 if __name__ == '__main__':
 
-	FUNS = [Ackley, Beale, Booth, Bukin, Easom, Eggholder, GoldsteinPrice, Himmelblau, HolderTable, Matyas, McCormick, Rastrigin, Rosenbrock, Schaffer, Schaffer_N4, StyblinskiTang]
+	FUNS = [Bukin, Eggholder, Rosenbrock]
 	for fun in FUNS:
 		test(fun)

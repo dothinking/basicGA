@@ -18,7 +18,7 @@ class Selection:
 class RouletteWheelSelection(Selection):
 	'''
 	select individuals by Roulette Wheel:
-	individuals selected with a probability of its fitness
+	individuals are selected by a probability on its fitness
 	'''	
 	def select(self, population, fitness):
 		selected_individuals = np.random.choice(population.individuals, population.size, p=fitness)
@@ -26,19 +26,26 @@ class RouletteWheelSelection(Selection):
 		population.individuals = np.array([copy.deepcopy(I) for I in selected_individuals])
 
 
-class RankingSelection(Selection):
+class LinearRankingSelection(Selection):
 	'''
-	the top individuals will always be selected
+	select individuals by Roulette Wheel:
+	individuals are selected by a probaility on its ranking
 	'''
-	def __init__(self, percent=0.3):
-		'''select the top percent'''
-		assert 0<percent<1
-		self.percent = percent
+	def __init__(self, rate=100):
+		'''
+		rate: probability ratio of the best individual to the worst
+			it shows the relative probability of the best/worst individual to be selected
+		'''
+		assert rate>1, 'the selection probability of the best individual should be larger than the worst'
+		self.rate = rate
 
 	def select(self, population, fitness):
 		pos = np.argsort(fitness)
-		top_pos = pos[int(population.size*(1-self.percent)):] # asc order
-		selected_individuals = np.random.choice(population.individuals[top_pos], population.size)
+		rank_fitness = 1.0 + (self.rate-1.0)/(population.size-1)*np.arange(population.size)
+		# normalize
+		# np.sum(rank_fitness) = population.size*(1+self.rate)/2
+		rank_fitness = rank_fitness/(population.size*(1+self.rate)/2.0) # 
+		selected_individuals = np.random.choice(population.individuals[pos], population.size, p=rank_fitness)
 		population.individuals = np.array([copy.deepcopy(I) for I in selected_individuals])
 
 #----------------------------------------------------------
@@ -112,7 +119,7 @@ class Crossover:
 				new_individuals.append(individual_a)
 				new_individuals.append(individual_b)
 
-		population.individuals = np.array(new_individuals[0:population.size+1])
+		population.individuals = np.array(new_individuals[0:population.size])
 
 
 #----------------------------------------------------------
