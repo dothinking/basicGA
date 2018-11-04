@@ -57,7 +57,6 @@ class Crossover:
 		# parameters check is skipped
 		self.rate = rate
 		self.alpha = alpha
-		self.adaptive = isinstance(rate, list)
 
 	@staticmethod
 	def cross_individuals(individual_a, individual_b, alpha):
@@ -84,8 +83,9 @@ class Crossover:
 		return new_individual_a, new_individual_b
 
 	def cross(self, population):
+		adaptive = isinstance(self.rate, list)
 		# adaptive rate
-		if self.adaptive:
+		if adaptive:
 			fitness = [I.fitness for I in population.individuals]
 			fit_max, fit_avg = np.max(fitness), np.mean(fitness)
 
@@ -95,7 +95,7 @@ class Crossover:
 
 		for individual_a, individual_b in zip(population.individuals[0:num+1], random_population[0:num+1]):			
 			# adaptive rate
-			if self.adaptive:
+			if adaptive:
 				fit = max(individual_a.fitness, individual_b.fitness)
 				if fit_max-fit_avg:
 					i_rate = self.rate[1] if fit<fit_avg else self.rate[1] - (self.rate[1]-self.rate[0])*(fit-fit_avg)/(fit_max-fit_avg)

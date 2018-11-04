@@ -60,14 +60,11 @@ class Population:
 		pos = np.argmin(evaluation)
 		return self.individuals[pos]
 
-	def fitness(self, fun_evaluation, fun_fitness, fun_adaptive=None):
+	def fitness(self, fun_evaluation, fun_fitness):
 		'''
 		calculate objectibe value and fitness for each individual.
 		fun_evaluation	: objective function
 		fun_fitness  	: population fitness based on evaluation
-		fun_adaptive	: the difference of fitness decrease with the increase of generation,
-							which could not show the competition of domanit individual,
-							so a adaptive function is used to enlarge the deviation
 		'''
 
 		# get the value directly if it has been calculated before
@@ -76,14 +73,8 @@ class Population:
 		# calculate fitness
 		fitness = fun_fitness(evaluation)
 		fitness = fitness/np.sum(fitness) # normalize
-
-		# a adaptive function is used to enlarge the deviation
-		if fun_adaptive:
-			fitness = fun_adaptive(fitness)
-			fitness = fitness/np.sum(fitness) # normalize
 		
 		# set attributes for each individual
-
 		for I, e, f in zip(self.individuals, evaluation, fitness):
 			I.evaluation = e
 			I.fitness = f

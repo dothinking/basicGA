@@ -17,7 +17,7 @@ class GA():
 		self.mutation = mutation
 		self.fun_fitness = fun_fitness
 
-	def run(self, fun_evaluation, gen=50, elitism=True, adaptive=True):
+	def run(self, fun_evaluation, gen=50, elitism=True):
 		'''
 		solve the problem based on Simple GA process
 		two improved methods could be considered:
@@ -29,29 +29,28 @@ class GA():
 		self.population.initialize()
 
 		# solving process
-		the_best = self.population.best(fun_evaluation, self.fun_fitness) if elitism else None
 		for n in range(1, gen+1):
 
-			# adaptive 1: fitness function for selection evaluation
-			m = n if n<100 else 100
-			f = (lambda x: np.exp(x/0.99**m)) if adaptive else None
-			fitness, _ = self.population.fitness(fun_evaluation, self.fun_fitness, f)
+			# the best individual in previous generation
+			if elitism:
+				the_best = copy.deepcopy(self.population.best(fun_evaluation, self.fun_fitness))
+
+			# selection
+			fitness, _ = self.population.fitness(fun_evaluation, self.fun_fitness)
 			self.selection.select(self.population, fitness)
 
-			# adaptive 2: crossover rate
+			# crossover
 			self.crossover.cross(self.population)
 
-			# adaptive 3: mutation rate
-			rate = 1.0 - np.random.rand()**(1.0-n/gen) if adaptive else np.random.rand()
+			# mutation
+			rate = 1.0 - np.random.rand()**(1.0-n/gen)
 			self.mutation.mutate(self.population, rate)
 
-			# update current population with the best individual ever
-			if not elitism: continue
-			current_best = self.population.best(fun_evaluation, self.fun_fitness)
-			if current_best.evaluation > the_best.evaluation:
-				self.population.individuals[-1] = copy.deepcopy(the_best) # replace the last one by default
-			else:
-				the_best = copy.deepcopy(current_best)
+			# elitism mechanism: 
+			# set a random individual as the best in previous generation
+			if elitism:
+				pos = np.random.randint(self.population.size)
+				self.population.individuals[pos] = the_best
 
 		# return the best individual
 		return self.population.best(fun_evaluation, self.fun_fitness)
@@ -66,16 +65,15 @@ if __name__ == '__main__':
 	# sol: x=[0,1.25313], min=0.292579
 	schaffer_n4 = lambda x: 0.5 + (np.cos(np.sin(abs(x[0]**2-x[1]**2)))**2-0.5) / (1.0+0.001*(x[0]**2+x[1]**2))**2
 
-	ranges = [(-100, 100)] * 2
+	ranges = [(-10, 10)] * 2
 
 	I = Individual(ranges)
 	P = Population(I, 50)
-	SRW = RouletteWheelSelection()
-	SR = RankingSelection(0.5)
+	S = RouletteWheelSelection()
 	C = Crossover([0.5, 0.9], 0.5)
 	M = Mutation(0.12)
 
-	g = GA(P, SR, C, M)
+	g = GA(P, S, C, M)
 	res = g.run(schaffer_n4, 800)	
 
 	x = [0,1.25313] 
