@@ -43,7 +43,7 @@ class GA():
 			self.crossover.cross(self.population)
 
 			# mutation
-			rate = 1.0 - np.random.rand()**(1.0-n/gen)
+			rate = 1.0 - np.random.rand()**((1.0-n/gen)**3)
 			self.mutation.mutate(self.population, rate)
 
 			# elitism mechanism: 
@@ -75,7 +75,7 @@ if __name__ == '__main__':
 	M = Mutation(0.12)
 
 	g = GA(P, S, C, M)
-	res = g.run(schaffer_n4, 800)	
+	res = g.run(schaffer_n4, 200)	
 
 	x = [0,1.25313] 
 	print('{0} : {1}'.format(res.evaluation, res.solution))

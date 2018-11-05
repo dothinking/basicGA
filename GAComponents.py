@@ -18,11 +18,15 @@ class Individual:
 		seeds = np.random.random(self.dimension)
 		lb = self.ranges[:, 0]
 		ub = self.ranges[:, 1]
-		self._solution = lb + (ub-lb)*seeds
+		self._solution = np.rint(lb + (ub-lb)*seeds)
 
 		# evaluation and fitness
+		self.initialize()
+
+	def initialize(self):
 		self.evaluation = None
 		self.fitness = None
+
 
 	@property
 	def solution(self):
@@ -32,8 +36,8 @@ class Individual:
 	def solution(self, solution):
 		assert self.dimension == solution.shape[0]
 		assert (solution>=self.ranges[:, 0]).all() and (solution<=self.ranges[:, 1]).all()
-		self._solution = solution
-	
+		self._solution = np.rint(solution)
+
 
 class Population:
 	'''collection of individuals'''

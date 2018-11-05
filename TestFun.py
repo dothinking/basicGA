@@ -55,7 +55,7 @@ class Booth(FUN):
 class Bukin(FUN):
 	def __init__(self):
 		self.objective = lambda x: 100*np.abs(x[1]-x[0]**2/100)**0.5 + np.abs(x[0]+10)/100
-		self.ranges = [(-15,5.0), (-3,3)]
+		self.ranges = [(-15,-5.0), (-3,3)]
 		self.solution = [(-10.0,1.0)]
 
 class Easom(FUN):
@@ -138,8 +138,9 @@ if __name__ == '__main__':
 	import matplotlib.pyplot as plt
 	from mpl_toolkits.mplot3d import Axes3D
 
-	f = Schaffer_N4()
+	f = Bukin()
 	fig = plt.figure()
 	ax = fig.add_subplot(111, projection='3d')
 	f.plot(ax)
+	plt.title(f.__class__.__name__)
 	plt.show()

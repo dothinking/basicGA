@@ -81,8 +81,8 @@ class Crossover:
 		new_value_b = individual_b.solution - temp
 
 		# return new individuals
-		new_individual_a = Individual(individual_a.ranges)
-		new_individual_b = Individual(individual_b.ranges)
+		new_individual_a = individual_a.__class__(individual_a.ranges)
+		new_individual_b = individual_b.__class__(individual_b.ranges)
 
 		new_individual_a.solution = new_value_a
 		new_individual_b.solution = new_value_b
@@ -138,15 +138,20 @@ class Mutation:
 		positions: mutating gene positions, list
 		alpha: mutatation magnitude
 		'''
-		for pos in positions:
-			if np.random.rand() < 0.5:
-				individual.solution[pos] -= (individual.solution[pos]-individual.ranges[:,0][pos])*alpha
-			else:
-				individual.solution[pos] += (individual.ranges[:,1][pos]-individual.solution[pos])*alpha
+		# for pos in positions:
+		# 	if np.random.rand() < 0.5:
+		# 		individual.solution[pos] -= (individual.solution[pos]-individual.ranges[:,0][pos])*alpha
+		# 	else:
+		# 		individual.solution[pos] += (individual.ranges[:,1][pos]-individual.solution[pos])*alpha
+
+		sol = copy.deepcopy(individual.solution)
+		p = np.random.rand(positions.shape[0])<=0.5 # change to lower bound or upper bound
+		L, U = individual.ranges[:,0][positions], individual.ranges[:,1][positions]
+		sol[positions] += ((U-sol[positions])-p*(U-L))*alpha
+		individual.solution = sol
 				
 		# reset evaluation
-		individual.evaluation = None 
-		individual.fitness = None 
+		individual.initialize()
 
 	
 	def mutate(self, population, alpha):
