@@ -10,7 +10,13 @@ class GA():
 	def __init__(self, population, selection, crossover, mutation, fun_fitness=lambda x:np.arctan(-x)+np.pi):
 		'''
 		fun_fitness: fitness based on objective values. minimize the objective by default
-		'''
+		'''		
+		# check compatibility between Individual and GA operators
+		if not crossover.individual_class or not population.individual.__class__ in crossover.individual_class:
+			raise ValueError('incompatible Individual class and Crossover operator')  
+		if not mutation.individual_class or not population.individual.__class__ in mutation.individual_class:
+			raise ValueError('incompatible Individual class and Mutation operator')
+
 		self.population = population
 		self.selection = selection
 		self.crossover = crossover
@@ -57,32 +63,3 @@ class GA():
 
 		# return the best individual
 		return self.population.best(fun_evaluation, self.fun_fitness)
-		
-
-if __name__ == '__main__':
-
-	from GAPopulation.DecimalIndividual import DecimalFloatIndividual
-	from GAPopulation.Population import Population
-	from GAOperators.Selection import RouletteWheelSelection, LinearRankingSelection
-	from GAOperators.Crossover import DecimalCrossover
-	from GAOperators.Mutation import DecimalMutation
-
-	# schaffer-N4
-	# sol: x=[0,1.25313], min=0.292579
-	schaffer_n4 = lambda x: 0.5 + (np.cos(np.sin(abs(x[0]**2-x[1]**2)))**2-0.5) / (1.0+0.001*(x[0]**2+x[1]**2))**2
-
-	ranges = [(-10, 10)] * 2
-
-	I = DecimalFloatIndividual(ranges)
-	P = Population(I, 50)
-	S = RouletteWheelSelection()
-	SL = LinearRankingSelection()
-	C = DecimalCrossover([0.5, 0.9], 0.5)
-	M = DecimalMutation(0.12)
-
-	g = GA(P, S, C, M)
-	res = g.run(schaffer_n4, 200)	
-
-	x = [0,1.25313] 
-	print('{0} : {1}'.format(res.evaluation, res.solution))
-	print('error: {:<3f} %'.format((res.evaluation/schaffer_n4(x)-1.0)*100))

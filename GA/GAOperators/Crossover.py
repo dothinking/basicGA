@@ -4,6 +4,7 @@
 import numpy as np
 from .Operators import Crossover
 
+from GA.GAPopulation.DecimalIndividual import DecimalFloatIndividual, DecimalIntegerIndividual
 
 class DecimalCrossover(Crossover):
 	'''
@@ -19,9 +20,10 @@ class DecimalCrossover(Crossover):
 					where f=max(individual_a, individual_b)
 			alpha: factor for crossing two chroms, [0,1]
 		'''
-		# parameters check is skipped
 		self.rate = rate
 		self.alpha = alpha
+
+		self._individual_class = [DecimalFloatIndividual, DecimalIntegerIndividual]
 
 	@staticmethod
 	def cross_individuals(individual_a, individual_b, alpha):

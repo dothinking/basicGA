@@ -4,7 +4,7 @@
 import numpy as np
 import copy
 from .Operators import Mutation
-
+from GA.GAPopulation.DecimalIndividual import DecimalFloatIndividual, DecimalIntegerIndividual
 
 class DecimalMutation(Mutation):
 	'''
@@ -17,6 +17,9 @@ class DecimalMutation(Mutation):
 		rate: propability of mutation, [0,1]
 		'''
 		self.rate = rate
+
+		# this operator is only available for DecimalIndividual
+		self._individual_class = [DecimalFloatIndividual, DecimalIntegerIndividual]
 
 	def mutate_individual(self, individual, positions, alpha):
 		'''

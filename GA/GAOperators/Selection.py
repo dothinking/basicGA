@@ -27,7 +27,9 @@ class LinearRankingSelection(Selection):
 		rate: probability ratio of the best individual to the worst
 			it shows the relative probability of the best/worst individual to be selected
 		'''
-		assert rate>=1, 'the selection probability of the best individual should be larger than the worst'
+		if rate<1.0:
+			raise ValueError('the selection probability of the best individual should be larger than the worst') 
+			
 		self.rate = rate
 
 	def select(self, population):

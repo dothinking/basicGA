@@ -49,6 +49,8 @@ def test(FUN):
 
 if __name__ == '__main__':
 
-	FUNS = [Bukin, Eggholder, Rosenbrock]
-	for fun in FUNS:
-		test(fun)
+	# FUNS = [Bukin, Eggholder, Rosenbrock]
+	# for fun in FUNS:
+	# 	test(fun)
+
+	test(Schaffer_N4)

@@ -15,6 +15,16 @@ class Selection:
 
 # CROSSOVER
 class Crossover:
+	'''
+	this operation is only available for Individual class defined in self._individual_class
+	'''
+	def __init__(self):
+		self._individual_class = None
+
+	@property
+	def individual_class(self):
+		return self._individual_class
+	
 	def cross(self, population):
 		'''
 		population: population to be crossed. population should be evaluated in advance 
@@ -24,7 +34,17 @@ class Crossover:
 
 
 # MUTATION
-class Mutation:	
+class Mutation:
+	'''
+	this operation is only available for Individual class defined in self._individual_class
+	'''
+	def __init__(self):
+		self._individual_class = None
+
+	@property
+	def individual_class(self):
+		return self._individual_class
+	
 	def mutate(self, population, alpha=None):
 		'''
 		- population: population to be selected. 
