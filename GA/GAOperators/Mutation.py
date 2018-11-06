@@ -5,6 +5,7 @@ import numpy as np
 import copy
 from .Operators import Mutation
 from GA.GAPopulation.DecimalIndividual import DecimalFloatIndividual, DecimalIntegerIndividual
+from GA.GAPopulation.SequenceIndividual import UniqueSeqIndividual, ZeroOneSeqIndividual
 
 class DecimalMutation(Mutation):
 	'''

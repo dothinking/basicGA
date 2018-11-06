@@ -7,9 +7,10 @@ package_path = os.path.dirname(os.path.dirname(os.path.dirname(script_path)))
 sys.path.append(package_path)
 
 from GA.GAPopulation.DecimalIndividual import DecimalFloatIndividual
+from GA.GAPopulation.SequenceIndividual import UniqueSeqIndividual
 from GA.GAPopulation.Population import Population
 from GA.GAOperators.Selection import RouletteWheelSelection, LinearRankingSelection
-from GA.GAOperators.Crossover import DecimalCrossover
+from GA.GAOperators.Crossover import DecimalCrossover, UniqueSeqCrossover
 from GA.GAOperators.Mutation import DecimalMutation
 from GA.GA import GA
 
@@ -53,4 +54,13 @@ if __name__ == '__main__':
 	# for fun in FUNS:
 	# 	test(fun)
 
-	test(Schaffer_N4)
+	# test(Schaffer_N4)
+
+	I = UniqueSeqIndividual(5)
+	P = Population(I, 50)
+	R = RouletteWheelSelection()
+	L = LinearRankingSelection(99)
+	C = UniqueSeqCrossover([0.6,0.9])
+	P.initialize()
+	P.evaluate(lambda x:x[0], lambda x:x)
+	C.cross(P)

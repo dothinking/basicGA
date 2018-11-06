@@ -2,38 +2,32 @@
 # GA Operator: crossover
 #----------------------------------------------------------
 import numpy as np
+import copy
 from .Operators import Crossover
-
 from GA.GAPopulation.DecimalIndividual import DecimalFloatIndividual, DecimalIntegerIndividual
+from GA.GAPopulation.SequenceIndividual import UniqueSeqIndividual, ZeroOneSeqIndividual
 
 class DecimalCrossover(Crossover):
 	'''
 	crossover operation for Decimal encoded individuals:
-	linear interpolate the selected two individuals to generate two new ones
+	generate two new individuals by linear interpolation between two selected individuals
 	'''
 	def __init__(self, rate=0.8, alpha=0.5):
 		'''
 		crossover operation:
-			rate: propability of crossover. adaptive rate when it is a list, e.g. [0.6,0.9]
-					if f<f_avg then rate = range_max
-					if f>=f_avg then rate = range_max-(range_max-range_min)*(f-f_avg)/(f_max-f_avg)
-					where f=max(individual_a, individual_b)
-			alpha: factor for crossing two chroms, [0,1]
+			- rate : propability of crossover. adaptive rate when it is a list, e.g. [0.6,0.9]
+			- alpha: factor for crossing two chroms, [0,1]
 		'''
-		self.rate = rate
-		self.alpha = alpha
-
+		super().__init__(rate)
 		self._individual_class = [DecimalFloatIndividual, DecimalIntegerIndividual]
 
 	@staticmethod
-	def cross_individuals(individual_a, individual_b, alpha):
+	def cross_individuals(individual_a, individual_b, pos, alpha):
 		'''
 		generate two child individuals based on parent individuals:
-		new values are calculated at random positions
-		alpha: linear ratio to cross two genes, exchange two genes if alpha is 0.0
+			- pos  : 0-1 vector to specify positions for crossing
+			- alpha: linear ratio to interpolate two genes, exchange two genes if alpha is 0.0
 		'''
-		# random positions to be crossed
-		pos = np.random.rand(individual_a.dimension) <= 0.5
 
 		# cross value
 		temp = (individual_b.solution-individual_a.solution)*pos*(1-alpha)
@@ -48,35 +42,57 @@ class DecimalCrossover(Crossover):
 		new_individual_b.solution = new_value_b
 
 		return new_individual_a, new_individual_b
+	
 
-	def cross(self, population):
-		adaptive = isinstance(self.rate, list)
-		# adaptive rate
-		if adaptive:
-			fitness = [I.fitness for I in population.individuals]
-			fit_max, fit_avg = np.max(fitness), np.mean(fitness)
+class UniqueSeqCrossover(Crossover):
+	'''
+	crossover operation for unique sequence individuals:
+		- exchange genes at random positions
+		- adjust to avoid duplicated genes
+	'''
+	def __init__(self, rate=0.8):
+		'''
+		crossover operation:
+			- rate: propability of crossover. adaptive rate when it is a list, e.g. [0.6,0.9]
+		'''
+		super().__init__(rate)
+		self._individual_class = [UniqueSeqIndividual]
 
-		new_individuals = []		
-		random_population = np.random.permutation(population.individuals) # random order
-		num = int(population.size/2.0)+1
+	@staticmethod
+	def cross_individuals(individual_a, individual_b, pos, alpha):
+		'''
+		generate two child individuals based on parent individuals:
+			- pos  : 0-1 vector to specify positions for crossing
+			- alpha: not used
+		'''
+		solution_a = copy.deepcopy(individual_a.solution)
+		solution_b = copy.deepcopy(individual_b.solution)
 
-		for individual_a, individual_b in zip(population.individuals[0:num+1], random_population[0:num+1]):			
-			# adaptive rate
-			if adaptive:
-				fit = max(individual_a.fitness, individual_b.fitness)
-				if fit_max-fit_avg:
-					i_rate = self.rate[1] if fit<fit_avg else self.rate[1] - (self.rate[1]-self.rate[0])*(fit-fit_avg)/(fit_max-fit_avg)
-				else:
-					i_rate = (self.rate[0]+self.rate[1])/2.0
-			else:
-				i_rate = self.rate
+		# elements to be exchanged
+		exchange_a, exchange_b= solution_a[pos], solution_b[pos]
 
-			# crossover
-			if np.random.rand() <= i_rate:
-				child_individuals = self.cross_individuals(individual_a, individual_b, self.alpha)
-				new_individuals.extend(child_individuals)
-			else:
-				new_individuals.append(individual_a)
-				new_individuals.append(individual_b)
+		# unique elements among the exchanged elements
+		diff_a, diff_b = np.setdiff1d(exchange_a, exchange_b), np.setdiff1d(exchange_b, exchange_a)
 
-		population.individuals = np.array(new_individuals[0:population.size])
+		# get duplicated elements after exchanging
+		x, y = np.zeros_like(solution_a), np.zeros_like(solution_b)
+		for t in diff_b:
+			x = x | (solution_a==t)
+		for t in diff_a:
+			y = y | (solution_b==t)
+		pos_a, pos_b = np.where(x), np.where(y)
+
+		# fix the duplicated elements
+		solution_a[pos_a], solution_b[pos_b] = solution_b[pos_b], solution_a[pos_a]
+
+		# exchange specified elements finally
+		solution_a[pos], solution_b[pos] = solution_b[pos], solution_a[pos]
+
+		# return new individuals
+		new_individual_a = individual_a.__class__(individual_a.ranges)
+		new_individual_b = individual_b.__class__(individual_b.ranges)
+
+		new_individual_a.solution = solution_a
+		new_individual_b.solution = solution_b
+
+		return new_individual_a, new_individual_b
