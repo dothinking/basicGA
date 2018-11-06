@@ -10,8 +10,13 @@
 GA operators could be extended to implement user defined algorithm.
 
 ```python
-from GAComponents import Individual, Population
-from GAOperators import RouletteWheelSelection, Crossover, Mutation
+from GA.GAPopulation.DecimalIndividual import DecimalFloatIndividual
+from GA.GAPopulation.Population import Population
+from GA.GAOperators.Selection import RouletteWheelSelection, LinearRankingSelection
+from GA.GAOperators.Crossover import DecimalCrossover
+from GA.GAOperators.Mutation import DecimalMutation
+from GA.GA import GA
+import numpy as np
 ```
 
 ## initialize GA
@@ -20,19 +25,19 @@ from GAOperators import RouletteWheelSelection, Crossover, Mutation
 # individual
 dimension = 2
 ranges = [(-10, 10)] * dimension
-I = Individual(ranges)
+I = DecimalFloatIndividual(ranges)
 
 # population
 P = Population(I, 50)
 
 # operators
 S = RouletteWheelSelection()
-C = Crossover([0.5, 0.9], 0.5) # adaptive crossover rate
-# C = Crossover(0.9, 0.5) # constant crossover rate
-M = Mutation(0.12)
+C = DecimalCrossover([0.5, 0.9], 0.5) # adaptive crossover rate
+# C = DecimalCrossover(0.9, 0.5) # constant crossover rate
+M = DecimalMutation(0.12)
 
 # GA
-g = GA(P, SRW, C, M)
+g = GA(P, S, C, M)
 ```
 
 ## solve
