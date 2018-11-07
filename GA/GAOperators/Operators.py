@@ -78,7 +78,7 @@ class Crossover:
 		for individual_a, individual_b in zip(population.individuals[0:num+1], random_population[0:num+1]):
 			# crossover
 			if np.random.rand() <= self.adaptive_rate(individual_a, individual_b, population):
-				# random positions to be crossed
+				# random positions to cross
 				pos = np.random.rand(individual_a.dimension) <= 0.5
 				child_individuals = self.cross_individuals(individual_a, individual_b, pos, self._alpha)
 				new_individuals.extend(child_individuals)
@@ -101,11 +101,28 @@ class Mutation:
 
 	@property
 	def individual_class(self):
-		return self._individual_class
+		return self._individual_class	
+
+	@staticmethod
+	def mutate_individual(individual, positions, alpha):
+		'''
+		positions: mutating gene positions, list
+		alpha: additional param, e.g. mutatation magnitude
+		'''
+		raise NotImplementedError
+
 	
-	def mutate(self, population, alpha=None):
+	def mutate(self, population, alpha):
 		'''
 		- population: population to be selected. 
 		- alpha		: additional params
 		'''
-		raise NotImplementedError
+		for individual in population.individuals:
+			if np.random.rand() > self.rate: continue
+			
+			# at least random positions to mutate
+			pos = np.random.rand(individual.dimension) <= 0.5 
+			while not any(pos):
+				pos = np.random.rand(individual.dimension) <= 0.5
+
+			self.mutate_individual(individual, pos, alpha)
