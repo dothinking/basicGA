@@ -8,19 +8,19 @@ from .Individual import Individual
 class UniqueSeqIndividual(Individual):
 	'''
 	sequence encoded individual: unique numbers in a certain order
-	ranges: int, e.g. ranges=5 -> 1,2,3,4,5
+	ranges: int, e.g. ranges=5 -> 0,1,2,3,4
 	'''
 	
 	def init_solution(self, ranges):
 		'''
-		initialize random solution: e.g. 5,3,2,1,4
+		initialize random solution: e.g. 0,3,2,1,4
 		'''	
 		if not isinstance(ranges, int) or ranges<=1:
 			raise ValueError('the sequence range should be larger than 1')
 
 		self._ranges = ranges
 		self._dimension = ranges
-		self._solution = np.random.choice(ranges, ranges, replace=False) + 1
+		self._solution = np.random.choice(ranges, ranges, replace=False)
 
 
 class ZeroOneSeqIndividual(Individual):
