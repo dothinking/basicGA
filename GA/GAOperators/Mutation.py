@@ -17,7 +17,7 @@ class DecimalMutation(Mutation):
 		mutation operation:
 		rate: propability of mutation, [0,1]
 		'''
-		self.rate = rate
+		super().__init__(rate)
 
 		# this operator is only available for DecimalIndividual
 		self._individual_class = [DecimalFloatIndividual, DecimalIntegerIndividual]
@@ -27,7 +27,7 @@ class DecimalMutation(Mutation):
 		'''
 		mutation method for decimal encoded individual:
 		to add a random deviation for gene in specified positions
-		- pos  : 0-1 vector to specify positions for crossing
+		- positions: 0-1 vector to specify positions for crossing
 		- alpha: mutatation magnitude
 		'''
 
@@ -48,4 +48,35 @@ class DecimalMutation(Mutation):
 				
 		# set new solution and reset evaluation
 		individual.solution = sol
+		individual.init_evaluation()
+
+
+class UniqueSeqMutation(Mutation):
+	'''
+	mutation operation for unique sequence individuals:
+	exchange genes at random positions
+	'''
+	def __init__(self, rate):
+		'''
+		mutation operation:
+		rate: propability of mutation, [0,1]
+		'''
+		super().__init__(rate)
+
+		# this operator is only available for UniqueSeqIndividual
+		self._individual_class = [UniqueSeqIndividual]
+
+	@staticmethod
+	def mutate_individual(individual, positions, alpha):
+		'''
+		exchange genes at specified positions:
+		- positions: 0-1 vector to specify positions for crossing
+		- alpha: additional param, ignored
+		'''
+
+		# reorder genes at specified positions
+		genes = np.random.permutation(individual.solution[positions])		
+				
+		# set new solution and reset evaluation
+		individual.solution[positions] = genes
 		individual.init_evaluation()
