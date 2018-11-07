@@ -12,10 +12,10 @@ GA operators could be extended to implement user defined algorithm.
 ```python
 from GA.GAPopulation.DecimalIndividual import DecimalFloatIndividual
 from GA.GAPopulation.Population import Population
-from GA.GAOperators.Selection import RouletteWheelSelection, LinearRankingSelection
+from GA.GAOperators.Selection import RouletteWheelSelection
 from GA.GAOperators.Crossover import DecimalCrossover
 from GA.GAOperators.Mutation import DecimalMutation
-from GA.GA import GA
+from GA.GAProcess import GA
 import numpy as np
 ```
 
