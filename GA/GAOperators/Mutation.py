@@ -22,36 +22,30 @@ class DecimalMutation(Mutation):
 		# this operator is only available for DecimalIndividual
 		self._individual_class = [DecimalFloatIndividual, DecimalIntegerIndividual]
 
-	def mutate_individual(self, individual, positions, alpha):
+	@staticmethod
+	def mutate_individual(individual, positions, alpha):
 		'''
-		positions: mutating gene positions, list
-		alpha: mutatation magnitude
+		mutation method for decimal encoded individual:
+		to add a random deviation for gene in specified positions
+		- pos  : 0-1 vector to specify positions for crossing
+		- alpha: mutatation magnitude
 		'''
-		# for pos in positions:
-		# 	if np.random.rand() < 0.5:
-		# 		individual.solution[pos] -= (individual.solution[pos]-individual.ranges[:,0][pos])*alpha
-		# 	else:
-		# 		individual.solution[pos] += (individual.ranges[:,1][pos]-individual.solution[pos])*alpha
 
-		sol = copy.deepcopy(individual.solution)
-		p = np.random.rand(positions.shape[0])<=0.5 # change to lower bound or upper bound
-		L, U = individual.ranges[:,0][positions], individual.ranges[:,1][positions]
-		sol[positions] += ((U-sol[positions])-p*(U-L))*alpha
-		individual.solution = sol
+		# for a gene G in range [L, U], either:
+		# 	G = G - (G-L)*alpha
+		# or:
+		#   G = G + (U-G)*alpha
+
+		# mutation options:
+		p = np.random.rand(individual.dimension)<=0.5
+
+		# lower/upper bound
+		L, U = individual.ranges[:,0], individual.ranges[:,1]
+		
+		# combine two mutation method
+		diff = ((U-individual.solution)-p*(U-L))*positions*alpha
+		sol = individual.solution + diff	
 				
-		# reset evaluation
+		# set new solution and reset evaluation
+		individual.solution = sol
 		individual.init_evaluation()
-
-	
-	def mutate(self, population, alpha):
-		'''
-		alpha: mutating magnitude
-		'''
-		for individual in population.individuals:
-			if np.random.rand() > self.rate:
-				continue
-
-			# select random positions to mutate
-			num = np.random.randint(individual.dimension) + 1
-			pos = np.random.choice(individual.dimension, num, replace=False)
-			self.mutate_individual(individual, pos, alpha)
