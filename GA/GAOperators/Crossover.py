@@ -18,7 +18,7 @@ class DecimalCrossover(Crossover):
 			- rate : propability of crossover. adaptive rate when it is a list, e.g. [0.6,0.9]
 			- alpha: factor for crossing two chroms, [0,1]
 		'''
-		super().__init__(rate)
+		super().__init__(rate, alpha)
 		self._individual_class = [DecimalFloatIndividual, DecimalIntegerIndividual]
 
 	@staticmethod
