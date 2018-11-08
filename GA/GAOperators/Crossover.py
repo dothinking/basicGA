@@ -69,13 +69,13 @@ class UniqueSeqCrossover(Crossover):
 		solution_b = copy.deepcopy(individual_b.solution)
 
 		# elements to be exchanged
-		exchange_a, exchange_b= solution_a[pos], solution_b[pos]
+		exchange_a, exchange_b = solution_a[pos], solution_b[pos]
 
 		# unique elements among the exchanged elements
 		diff_a, diff_b = np.setdiff1d(exchange_a, exchange_b), np.setdiff1d(exchange_b, exchange_a)
 
 		# get duplicated elements after exchanging
-		x, y = np.zeros_like(solution_a), np.zeros_like(solution_b)
+		x, y = np.zeros_like(solution_a).astype(np.bool), np.zeros_like(solution_b).astype(np.bool)
 		for t in diff_b:
 			x = x | (solution_a==t)
 		for t in diff_a:

@@ -57,15 +57,19 @@ class UniqueLoopIndividual(Individual):
 		'''
 
 		if sequence[0] == 0:
-			return sequence
+			unique_seq = sequence
+		else:
+			# find position of element 0
+			arg = np.argwhere(sequence==0) # [[3]]
+			pos = arg[0][0]
 
-		# find position of element 0
-		arg = np.argwhere(sequence==0) # [[3]]
-		pos = arg[0][0]
+			# exchange two sections seperated by element 0
+			unique_seq = np.empty_like(sequence)
+			unique_seq[0:-pos], unique_seq[-pos:] = sequence[pos:], sequence[0:pos]
 
-		# exchange two sections seperated by element 0
-		unique_seq = np.empty_like(sequence)
-		unique_seq[0:-pos], unique_seq[-pos:] = sequence[pos:], sequence[0:pos]
+		# deal with clockwise and anticlockwise loop
+		if unique_seq[1] > unique_seq[-1]:
+			unique_seq[1:] = unique_seq[-1:0:-1]
 		
 		return unique_seq
 
