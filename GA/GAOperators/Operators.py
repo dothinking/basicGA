@@ -35,7 +35,7 @@ class Crossover:
 		self._alpha = alpha
 		self._individual_class = None
 
-	def adaptive_rate(self, individual_a, individual_b, population):
+	def _adaptive_rate(self, individual_a, individual_b, population):
 		'''
 		get the adaptive rate when cross over two individuals:
 		if f<f_avg  then rate = range_max,
@@ -65,6 +65,17 @@ class Crossover:
 			- alpha: linear ratio to interpolate two genes, exchange two genes if alpha is 0.0
 		'''
 		raise NotImplementedError
+
+	@staticmethod
+	def _cross_positions(dimension):
+		'''generate a random and continuous range of positions for crossover'''
+
+		# start, end position
+		pos = np.random.choice(dimension, 2)
+		start, end = pos.min(), pos.max()
+		positions = np.zeros(dimension).astype(np.bool)
+		positions[start:end+1] = True
+		return positions
 	
 	def cross(self, population):
 		'''
@@ -77,12 +88,9 @@ class Crossover:
 
 		for individual_a, individual_b in zip(population.individuals[0:num+1], random_population[0:num+1]):
 			# crossover
-			if np.random.rand() <= self.adaptive_rate(individual_a, individual_b, population):
-				# at least one random position to cross
-				pos = np.random.rand(individual_a.dimension) <= 0.5 
-				while not any(pos):
-					pos = np.random.rand(individual_a.dimension) <= 0.5
-
+			if np.random.rand() <= self._adaptive_rate(individual_a, individual_b, population):
+				# random position to cross
+				pos = self._cross_positions(individual_a.dimension)
 				child_individuals = self.cross_individuals(individual_a, individual_b, pos, self._alpha)
 				new_individuals.extend(child_individuals)
 
@@ -115,6 +123,13 @@ class Mutation:
 		'''
 		raise NotImplementedError
 
+	@staticmethod
+	def _mutate_positions(dimension, num=2):
+		'''select num positions from dimension to mutate'''
+		pos = np.random.choice(dimension, num, replace=dimension<num)
+		positions = np.zeros(dimension).astype(np.bool)
+		positions[pos] = True
+		return positions
 	
 	def mutate(self, population, alpha=None):
 		'''
@@ -123,10 +138,5 @@ class Mutation:
 		'''
 		for individual in population.individuals:
 			if np.random.rand() > self._rate: continue
-
-			# at least one random position to mutate
-			pos = np.random.rand(individual.dimension) <= 0.5 
-			while not any(pos):
-				pos = np.random.rand(individual.dimension) <= 0.5
-
+			pos = self._mutate_positions(individual.dimension, 2)
 			self.mutate_individual(individual, pos, alpha)

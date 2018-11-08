@@ -5,7 +5,7 @@ import numpy as np
 import copy
 from .Operators import Mutation
 from GA.GAPopulation.DecimalIndividual import DecimalFloatIndividual, DecimalIntegerIndividual
-from GA.GAPopulation.SequenceIndividual import UniqueSeqIndividual, ZeroOneSeqIndividual
+from GA.GAPopulation.SequenceIndividual import UniqueSeqIndividual, UniqueLoopIndividual, ZeroOneSeqIndividual
 
 class DecimalMutation(Mutation):
 	'''
@@ -64,7 +64,7 @@ class UniqueSeqMutation(Mutation):
 		super().__init__(rate)
 
 		# this operator is only available for UniqueSeqIndividual
-		self._individual_class = [UniqueSeqIndividual]
+		self._individual_class = [UniqueSeqIndividual, UniqueLoopIndividual]
 
 	@staticmethod
 	def mutate_individual(individual, positions, alpha):

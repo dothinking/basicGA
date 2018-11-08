@@ -5,7 +5,7 @@ import numpy as np
 import copy
 from .Operators import Crossover
 from GA.GAPopulation.DecimalIndividual import DecimalFloatIndividual, DecimalIntegerIndividual
-from GA.GAPopulation.SequenceIndividual import UniqueSeqIndividual, ZeroOneSeqIndividual
+from GA.GAPopulation.SequenceIndividual import UniqueSeqIndividual, UniqueLoopIndividual, ZeroOneSeqIndividual
 
 class DecimalCrossover(Crossover):
 	'''
@@ -56,7 +56,7 @@ class UniqueSeqCrossover(Crossover):
 			- rate: propability of crossover. adaptive rate when it is a list, e.g. [0.6,0.9]
 		'''
 		super().__init__(rate)
-		self._individual_class = [UniqueSeqIndividual]
+		self._individual_class = [UniqueSeqIndividual, UniqueLoopIndividual]
 
 	@staticmethod
 	def cross_individuals(individual_a, individual_b, pos, alpha):

@@ -7,16 +7,27 @@ from .Individual import Individual
 
 class UniqueSeqIndividual(Individual):
 	'''
-	sequence encoded individual: unique numbers in a certain order	
+	sequence encoded individual: unique numbers in a certain order
+	- ranges: int, e.g. ranges=5 -> 0,1,2,3,4
 	'''
+	
+	def init_solution(self, ranges):
+		'''
+		initialize random solution: e.g. 0,3,2,1,4
+		'''	
+		if not isinstance(ranges, int) or ranges<=1:
+			raise ValueError('the sequence range should be larger than 1')
 
-	def __init__(self, ranges, loop=False):
-		'''
-		ranges: int, e.g. ranges=5 -> 0,1,2,3,4
-		loop: bool, if True: 0,1,2,3,4 = 1,2,3,4,0 = 3,4,0,1,2 = ...
-		'''
-		self.loop = loop
-		super().__init__(ranges)
+		self._ranges = ranges
+		self._dimension = ranges
+		self._solution = np.random.choice(ranges, ranges, replace=False)
+
+
+class UniqueLoopIndividual(Individual):
+	'''
+	sequence encoded individual: unique numbers in a certain loop
+	- ranges: int, e.g. ranges=5 -> 0,1,2,3,4 = 1,2,3,4,0 = 3,4,0,1,2 = ...
+	'''
 	
 	def init_solution(self, ranges):
 		'''
@@ -28,8 +39,7 @@ class UniqueSeqIndividual(Individual):
 		self._ranges = ranges
 		self._dimension = ranges
 		seq = np.random.choice(ranges, ranges, replace=False)
-		self._solution = self.unique_sequence(seq)
-		print(self._solution)
+		self._solution = self._unique_sequence(seq)
 
 	@property
 	def solution(self):
@@ -37,16 +47,16 @@ class UniqueSeqIndividual(Individual):
 
 	@solution.setter
 	def solution(self, solution):
-		self._solution = self.unique_sequence(solution)
+		self._solution = self._unique_sequence(solution)
 
-	def unique_sequence(self, sequence):
+	def _unique_sequence(self, sequence):
 		'''
 		only relative order is considered for a sequece loop, 
 		so represent the loop from element 0
 		e.g. 1,4,0,2,3 -> 0,2,3,1,4
 		'''
 
-		if not self.loop: # do nothing if the sequence is not a loop
+		if sequence[0] == 0:
 			return sequence
 
 		# find position of element 0
@@ -58,7 +68,6 @@ class UniqueSeqIndividual(Individual):
 		unique_seq[0:-pos], unique_seq[-pos:] = sequence[pos:], sequence[0:pos]
 		
 		return unique_seq
-
 
 
 class ZeroOneSeqIndividual(Individual):

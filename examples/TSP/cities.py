@@ -20,14 +20,19 @@ class TSP:
 	def min_distance(self):
 		return self.distances(self.solution) if not self.solution is None else None
 
-	def plot_cities(self, ax):
-		for city in self.cities:
-			ax.scatter(city[0], city[1], c='b', marker='o')
+	def plot_cities(self, plt):
+		for i,city in enumerate(self.cities):
+			plt.scatter(city[0], city[1], c='b', marker='o')
+			plt.annotate(str(i), xy=(city[0], city[1]))
 
-	def plot_path(self, ax, tour):
-		if not tour is None:
-			data = self.cities[tour,:]
-			ax.plot(data[:,0], data[:,1])
+	def plot_path(self, plt, tour):
+		if tour is None: return
+		if not self.solution is None and not any(tour-self.solution):
+			ls = '--'
+		else:
+			ls = '-'
+		data = self.cities[tour,:]
+		plt.plot(data[:,0], data[:,1], linestyle=ls)
 
 
 
@@ -38,18 +43,7 @@ if __name__ == '__main__':
 	
 
 	T = TSP('dataset/eil51.tsp', 'dataset/eil51.opt.tour')
-	tour = np.random.choice(T.dimension, T.dimension, replace=False)
 
-	print(T.distances(tour))
-	print(T.min_distance)
-
-	fig = plt.figure()
-	ax = fig.add_subplot(111)
-	T.plot_cities(ax)
-	T.plot_path(ax, T.solution)
-	T.plot_path(ax, tour)
+	T.plot_cities(plt)
+	T.plot_path(plt, T.solution)
 	plt.show()
-
-
-
-

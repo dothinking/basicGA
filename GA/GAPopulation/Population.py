@@ -40,7 +40,7 @@ class Population:
 
 		# calculate fitness
 		fitness = fun_fitness(evaluation)
-		fitness = fitness/np.sum(fitness) # normalize
+		fitness = fitness/fitness.sum() # normalize
 		
 		# set attributes for each individual
 		for I, e, f in zip(self.individuals, evaluation, fitness):
