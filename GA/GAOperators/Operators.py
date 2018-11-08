@@ -82,13 +82,17 @@ class Crossover:
 		population: population to be crossed. population should be evaluated in advance 
 					since the crossover may be based on individual fitness.
 		'''
-		new_individuals = []		
+		
 		random_population = np.random.permutation(population.individuals) # random order
-		num = int(population.size/2.0)+1
-
-		for individual_a, individual_b in zip(population.individuals[0:num+1], random_population[0:num+1]):
+		new_individuals, count = [], 0
+		for individual_a, individual_b in zip(population.individuals, random_population):
 			# crossover
 			if np.random.rand() <= self._adaptive_rate(individual_a, individual_b, population):
+
+				# parent individuals should not be the same
+				if not any(individual_a.solution-individual_b.solution):
+					continue
+
 				# random position to cross
 				pos = self._cross_positions(individual_a.dimension)
 				child_individuals = self.cross_individuals(individual_a, individual_b, pos, self._alpha)
@@ -98,6 +102,13 @@ class Crossover:
 			else:
 				new_individuals.append(individual_a)
 				new_individuals.append(individual_b)
+
+			# generate two child at one crossover
+			count += 2
+
+			# stop when reach the population size
+			if count > population.size:
+				break
 
 		population.individuals = np.array(new_individuals[0:population.size])
 
