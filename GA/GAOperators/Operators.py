@@ -110,8 +110,11 @@ class Crossover:
 			if count > population.size:
 				break
 
-		population.individuals = np.array(new_individuals[0:population.size])
-
+		# the count of new individuals may lower than the population size
+		# since same parent individuals for crossover would be ignored
+		# so when count < size, param `replace` for choice() is True,
+		# which means dupilcated individuals are necessary
+		population.individuals = np.random.choice(new_individuals, population.size, replace=count<population.size)
 
 # MUTATION
 class Mutation:
