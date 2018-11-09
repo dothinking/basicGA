@@ -24,6 +24,12 @@ class Individual:
 		self.init_evaluation()
 
 	def init_solution(self, ranges):
+		'''
+		initialize a random solution, three required properties:
+        - self._ranges: ranges for the solution
+        - self._dimension: count of variables
+        - self._solution: solution for the problem
+        '''
 		self._ranges = ranges
 		self._dimension = None
 		self._solution = None
