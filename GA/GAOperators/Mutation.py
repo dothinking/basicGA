@@ -31,24 +31,22 @@ class DecimalMutation(Mutation):
 		- alpha: mutatation magnitude
 		'''
 
-		# for a gene G in range [L, U], either:
-		# 	G = G - (G-L)*alpha
-		# or:
-		#   G = G + (U-G)*alpha
+		# for a gene G in range [L, U],
+		# option 0: G = G + (U-G)*alpha
+		# option 1:	G = G + (L-G)*alpha	
 
 		# mutation options:
-		p = np.random.rand(individual.dimension)<=0.5
+		p = np.random.choice(2,individual.dimension)
 
 		# lower/upper bound
 		L, U = individual.ranges[:,0], individual.ranges[:,1]
 		
 		# combine two mutation method
 		diff = ((U-individual.solution)-p*(U-L))*positions*alpha
-		sol = individual.solution + diff	
-				
-		# set new solution and reset evaluation
-		individual.solution = sol
-		individual.init_evaluation()
+		solution = individual.solution + diff
+
+		return solution			
+		
 
 
 class UniqueSeqMutation(Mutation):
@@ -74,9 +72,8 @@ class UniqueSeqMutation(Mutation):
 		- alpha: additional param, ignored
 		'''
 
+		solution = copy.deepcopy(individual.solution)
 		# reorder genes at specified positions
-		genes = np.random.permutation(individual.solution[positions])		
+		solution[positions] = np.random.permutation(solution[positions])
 				
-		# set new solution and reset evaluation
-		individual.solution[positions] = genes
-		individual.init_evaluation()
+		return solution
