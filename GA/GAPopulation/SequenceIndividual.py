@@ -64,8 +64,7 @@ class UniqueLoopIndividual(Individual):
 			pos = arg[0][0]
 
 			# exchange two sections seperated by element 0
-			unique_seq = np.empty_like(sequence)
-			unique_seq[0:-pos], unique_seq[-pos:] = sequence[pos:], sequence[0:pos]
+			unique_seq = np.concatenate((sequence[pos:],sequence[0:pos]))
 
 		# deal with clockwise and anticlockwise loop
 		if unique_seq[1] > unique_seq[-1]:
