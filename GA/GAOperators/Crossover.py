@@ -58,6 +58,7 @@ class UniqueSeqCrossover(Crossover):
 		super().__init__(rate)
 		self._individual_class = [UniqueSeqIndividual, UniqueLoopIndividual]
 
+
 	@staticmethod
 	def cross_individuals(individual_a, individual_b, pos, alpha):
 		'''
@@ -72,18 +73,12 @@ class UniqueSeqCrossover(Crossover):
 		exchange_a, exchange_b = solution_a[pos], solution_b[pos]
 
 		# unique elements among the exchanged elements
-		diff_a, diff_b = np.setdiff1d(exchange_a, exchange_b), np.setdiff1d(exchange_b, exchange_a)
-
-		# get duplicated elements after exchanging
-		x, y = np.zeros_like(solution_a).astype(np.bool), np.zeros_like(solution_b).astype(np.bool)
-		for t in diff_b:
-			x = x | (solution_a==t)
-		for t in diff_a:
-			y = y | (solution_b==t)
-		pos_a, pos_b = np.where(x), np.where(y)
+		diff_a = np.setdiff1d(exchange_a, exchange_b)
+		diff_b = np.setdiff1d(exchange_b, exchange_a)
 
 		# fix the duplicated elements
-		solution_a[pos_a], solution_b[pos_b] = solution_b[pos_b], solution_a[pos_a]
+		solution_a[np.isin(solution_a, diff_b)] = diff_a
+		solution_b[np.isin(solution_b, diff_a)] = diff_b
 
 		# exchange specified elements finally
 		solution_a[pos], solution_b[pos] = solution_b[pos], solution_a[pos]
