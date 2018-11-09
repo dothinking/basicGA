@@ -8,8 +8,8 @@ import numpy as np
 class Selection:
 	def select(self, population):
 		'''
-		population: population to be selected. population should be evaluated in advance 
-					since the selection is based on individual fitness.
+		- population: where the individuals from
+		- return: the selected individuals
 		'''
 		raise NotImplementedError
 
@@ -60,10 +60,12 @@ class Crossover:
 	@staticmethod
 	def cross_individuals(individual_a, individual_b, pos, alpha):
 		'''
-		generate two child individuals based on parent individuals:
-			- pos  : 0-1 vector to specify positions for crossing
-			- alpha: linear ratio to interpolate two genes, exchange two genes if alpha is 0.0
-		'''
+        generate two individuals based on parent individuals:
+            - individual_a, individual_b: the selected individuals
+            - pos  : 0-1 vector to specify positions for crossing
+            - alpha: additional param
+            - return: two generated individuals
+        '''
 		raise NotImplementedError
 
 	@staticmethod
@@ -114,7 +116,7 @@ class Crossover:
 		# since same parent individuals for crossover would be ignored
 		# so when count < size, param `replace` for choice() is True,
 		# which means dupilcated individuals are necessary
-		population.individuals = np.random.choice(new_individuals, population.size, replace=count<population.size)
+		return np.random.choice(new_individuals, population.size, replace=count<population.size)
 
 # MUTATION
 class Mutation:
@@ -132,15 +134,19 @@ class Mutation:
 	@staticmethod
 	def mutate_individual(individual, positions, alpha):
 		'''
-		positions: mutating gene positions, list
-		alpha: additional param, e.g. mutatation magnitude
-		'''
+        get mutated solution based on the selected individual:
+            - individual: the selected individual
+            - positions : 0-1 vector to specify positions for crossing
+            - alpha: additional param
+            - return: the mutated solution
+        '''
 		raise NotImplementedError
 
 	@staticmethod
 	def _mutate_positions(dimension, num=2):
 		'''select num positions from dimension to mutate'''
-		pos = np.random.choice(dimension, num, replace=dimension<num)
+		num = np.random.randint(dimension)+1
+		pos = np.random.choice(dimension, num, replace=False)
 		positions = np.zeros(dimension).astype(np.bool)
 		positions[pos] = True
 		return positions
@@ -152,5 +158,6 @@ class Mutation:
 		'''
 		for individual in population.individuals:
 			if np.random.rand() > self._rate: continue
-			pos = self._mutate_positions(individual.dimension, 2)
-			self.mutate_individual(individual, pos, alpha)
+			pos = self._mutate_positions(individual.dimension)
+			individual.solution = self.mutate_individual(individual, pos, alpha)			
+			individual.init_evaluation() # reset evaluation
