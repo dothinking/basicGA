@@ -46,10 +46,10 @@ class GA():
 				self.population.evaluate(fun_evaluation, self.fun_fitness)
 
 			# selection
-			self.selection.select(self.population)
+			self.population.individuals = self.selection.select(self.population)
 
 			# crossover
-			self.crossover.cross(self.population)
+			self.population.individuals = self.crossover.cross(self.population)
 
 			# mutation
 			rate = 1.0 - np.random.rand()**((1.0-n/gen)**3)
