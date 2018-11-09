@@ -1,13 +1,13 @@
 # Practise Genetic Algorithm in Python
 
 - single-objective minimization
-- elitist preservation to improve Simple GA
-- adaptive crossover probability
+- built-in Individual and Operators for mathematical functions, travelling salesman problem
+- user-defined Individuals and Operators
 - based on Numpy
 
-## import modules
+An example for solving the minimum solution of common test function `schaffer N4` is shown below.
 
-GA operators could be extended to implement user defined algorithm.
+## Import modules
 
 ```python
 from GA.GAPopulation.DecimalIndividual import DecimalFloatIndividual
@@ -19,7 +19,7 @@ from GA.GAProcess import GA
 import numpy as np
 ```
 
-## initialize GA
+## Initialize GA
 
 ```python
 # individual
@@ -40,7 +40,7 @@ M = DecimalMutation(0.12)
 g = GA(P, S, C, M)
 ```
 
-## solve
+## Solve
 
 ```python
 # schaffer-N4
