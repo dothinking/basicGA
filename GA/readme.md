@@ -2,7 +2,7 @@
 
 ## GA Process
 
-A general process is implemented to solve different problems, e.g. `mathematical function`s, `TSP`, which would be modeled with built-in or user-defined Individals and Operators.
+A general process is implemented to solve different problems, e.g. `mathematical function`, `TSP`, which would be modeled with built-in or user-defined Individals and Operators. Features of this process:
 
 - single-objective minimization
 - elitist preservation to improve Simple GA
