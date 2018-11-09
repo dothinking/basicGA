@@ -13,8 +13,9 @@ class RouletteWheelSelection(Selection):
 	def select(self, population):
 		fitness = np.array([I.fitness for I in population.individuals])
 		selected_individuals = np.random.choice(population.individuals, population.size, p=fitness)
-		# pay attention to deep copy these objects
-		population.individuals = np.array([copy.deepcopy(I) for I in selected_individuals])
+
+		# pay attention to deep copy these objects		
+		return np.array([copy.deepcopy(I) for I in selected_individuals])
 
 
 class LinearRankingSelection(Selection):
@@ -39,5 +40,6 @@ class LinearRankingSelection(Selection):
 		# normalize
 		rank_fitness = rank_fitness/(population.size*(1+self.rate)/2.0) # np.sum(rank_fitness) = population.size*(1+self.rate)/2
 		selected_individuals = np.random.choice(population.individuals[pos], population.size, p=rank_fitness)
-		population.individuals = np.array([copy.deepcopy(I) for I in selected_individuals])
+		
+		return np.array([copy.deepcopy(I) for I in selected_individuals])
 
