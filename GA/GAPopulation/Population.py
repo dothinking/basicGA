@@ -20,7 +20,7 @@ class Population:
 		IndvClass = self.individual.__class__
 		self.individuals = np.array([IndvClass(self.individual.ranges) for i in range(self.size)], dtype=IndvClass)
 
-	def best(self, fun_evaluation, fun_fitness=lambda x: x):
+	def best(self, fun_evaluation, fun_fitness):
 		'''get best individual according to evaluation value '''
 		# evaluate first and collect evaluations
 		_, evaluation = self.evaluate(fun_evaluation, fun_fitness)
@@ -28,7 +28,7 @@ class Population:
 		pos = np.argmin(evaluation)
 		return self.individuals[pos]
 
-	def evaluate(self, fun_evaluation, fun_fitness=lambda x: x):
+	def evaluate(self, fun_evaluation, fun_fitness):
 		'''
 		calculate objectibe value and fitness for each individual.
 		fun_evaluation	: objective function

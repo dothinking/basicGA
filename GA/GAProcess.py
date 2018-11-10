@@ -7,7 +7,7 @@ import copy
 
 class GA():
 	'''Simple Genetic Algorithm'''
-	def __init__(self, population, selection, crossover, mutation, fun_fitness=lambda x:np.arctan(-x)+np.pi):
+	def __init__(self, population, selection, crossover, mutation, fun_fitness=None):
 		'''
 		fun_fitness: fitness based on objective values. minimize the objective by default
 		'''		
@@ -21,9 +21,9 @@ class GA():
 		self.selection = selection
 		self.crossover = crossover
 		self.mutation = mutation
-		self.fun_fitness = fun_fitness
+		self.fun_fitness = fun_fitness if fun_fitness else lambda x:np.arctan(-x)+np.pi
 
-	def run(self, fun_evaluation, gen=50, elitism=True):
+	def run(self, fun_evaluation, gen=50):
 		'''
 		solve the problem based on Simple GA process
 		two improved methods could be considered:
@@ -38,12 +38,7 @@ class GA():
 		for n in range(1, gen+1):
 
 			# the best individual in previous generation
-			# attention: the population was evaluated when calculating the best individual
-			# 			 otherwise, evaluate the population explicitly
-			if elitism:
-				the_best = copy.deepcopy(self.population.best(fun_evaluation, self.fun_fitness))
-			else:
-				self.population.evaluate(fun_evaluation, self.fun_fitness)
+			the_best = copy.deepcopy(self.population.best(fun_evaluation, self.fun_fitness))
 
 			# selection
 			self.population.individuals = self.selection.select(self.population)
@@ -53,13 +48,12 @@ class GA():
 
 			# mutation
 			rate = 1.0 - np.random.rand()**((1.0-n/gen)**3)
-			self.mutation.mutate(self.population, rate)
+			self.mutation.mutate(self.population, rate, fun_evaluation)
 
 			# elitism mechanism: 
 			# set a random individual as the best in previous generation
-			if elitism:
-				pos = np.random.randint(self.population.size)
-				self.population.individuals[pos] = the_best
+			pos = np.random.randint(self.population.size)
+			self.population.individuals[pos] = the_best
 
 		# return the best individual
 		return self.population.best(fun_evaluation, self.fun_fitness)

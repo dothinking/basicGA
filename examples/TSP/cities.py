@@ -7,8 +7,23 @@ class TSP:
 		self.cities = arr[:,1:]
 		self.dimension = arr.shape[0]
 		self.solution = np.loadtxt(sol_filename).astype(np.int32)-1 if sol_filename else None
+		self.distances = self.init_distances()
 
-	def distances(self, tour):
+	def init_distances(self):
+		X = self.cities[:,0].reshape((1,self.dimension))
+		Y = self.cities[:,1].reshape((1,self.dimension))
+		return ((X-X.T)**2 + (Y-Y.T)**2)**0.5
+
+	def distance(self, tour):
+		temp_tour = np.empty_like(tour)
+		temp_tour[0:-1] = tour[1:]
+		temp_tour[-1] = tour[0]
+		# d = (self.cities[tour,:]-self.cities[temp_tour,:])**2
+		# res = np.sqrt(d.sum(axis=1))
+		res = self.distances[tour, temp_tour]
+		return res.sum()
+
+	def cal_distance(self,tour):
 		temp_tour = np.empty_like(tour)
 		temp_tour[0:-1] = tour[1:]
 		temp_tour[-1] = tour[0]
@@ -18,7 +33,7 @@ class TSP:
 
 	@property
 	def min_distance(self):
-		return self.distances(self.solution) if not self.solution is None else None
+		return self.distance(self.solution) if not self.solution is None else None
 
 	def plot_cities(self, plt):
 		for i,city in enumerate(self.cities):
@@ -42,8 +57,11 @@ if __name__ == '__main__':
 	import matplotlib.pyplot as plt
 	
 
-	T = TSP('dataset/eil51.tsp', 'dataset/eil51.opt.tour')
+	T = TSP('dataset/a280.tsp', 'dataset/a280.opt.tour')
+	print(T.min_distance)
+	print(T.cal_distance(T.solution))
 
 	T.plot_cities(plt)
 	T.plot_path(plt, T.solution)
 	plt.show()
+	

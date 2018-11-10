@@ -66,8 +66,8 @@ class UniqueSeqCrossover(Crossover):
 			- pos  : 0-1 vector to specify positions for crossing
 			- alpha: not used
 		'''
-		solution_a = copy.deepcopy(individual_a.solution)
-		solution_b = copy.deepcopy(individual_b.solution)
+		solution_a = individual_a.solution.copy()
+		solution_b = individual_b.solution.copy()
 
 		# elements to be exchanged
 		exchange_a, exchange_b = solution_a[pos], solution_b[pos]

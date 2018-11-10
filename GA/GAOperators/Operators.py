@@ -71,7 +71,6 @@ class Crossover:
 	@staticmethod
 	def _cross_positions(dimension):
 		'''generate a random and continuous range of positions for crossover'''
-
 		# start, end position
 		pos = np.random.choice(dimension, 2)
 		start, end = pos.min(), pos.max()
@@ -89,11 +88,8 @@ class Crossover:
 		new_individuals, count = [], 0
 		for individual_a, individual_b in zip(population.individuals, random_population):
 			# crossover
-			if np.random.rand() <= self._adaptive_rate(individual_a, individual_b, population):
-
-				# parent individuals should not be the same
-				if not any(individual_a.solution-individual_b.solution):
-					continue
+			if np.random.rand() <= self._adaptive_rate(individual_a, individual_b, population) and \
+						not any(individual_a.solution-individual_b.solution):
 
 				# random position to cross
 				pos = self._cross_positions(individual_a.dimension)
@@ -132,18 +128,21 @@ class Mutation:
 		return self._individual_class	
 
 	@staticmethod
-	def mutate_individual(individual, positions, alpha):
+	def mutate_individual(individual, positions, alpha, fun_evaluation=None):
 		'''
         get mutated solution based on the selected individual:
             - individual: the selected individual
             - positions : 0-1 vector to specify positions for crossing
             - alpha: additional param
+            - fun_evaluation: objective function to evaluate the mutation results
+				it is not required by Simple Genetic Algorithm, but an optional method
+				to improve the algorithm by considering problem associated knowledge
             - return: the mutated solution
         '''
 		raise NotImplementedError
 
 	@staticmethod
-	def _mutate_positions(dimension, num=2):
+	def _mutate_positions(dimension):
 		'''select num positions from dimension to mutate'''
 		num = np.random.randint(dimension)+1
 		pos = np.random.choice(dimension, num, replace=False)
@@ -151,13 +150,14 @@ class Mutation:
 		positions[pos] = True
 		return positions
 	
-	def mutate(self, population, alpha=None):
+	def mutate(self, population, alpha=None, fun_evaluation=None):
 		'''
 		- population: population to be selected. 
-		- alpha		: additional params
+		
+		- alpha: additional params
 		'''
 		for individual in population.individuals:
 			if np.random.rand() > self._rate: continue
 			pos = self._mutate_positions(individual.dimension)
-			individual.solution = self.mutate_individual(individual, pos, alpha)			
+			individual.solution = self.mutate_individual(individual, pos, alpha, fun_evaluation)			
 			individual.init_evaluation() # reset evaluation

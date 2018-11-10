@@ -2,7 +2,6 @@
 # GA Operator: mutation
 #----------------------------------------------------------
 import numpy as np
-import copy
 from .Operators import Mutation
 from GA.GAPopulation.DecimalIndividual import DecimalFloatIndividual, DecimalIntegerIndividual
 from GA.GAPopulation.SequenceIndividual import UniqueSeqIndividual, UniqueLoopIndividual, ZeroOneSeqIndividual
@@ -23,7 +22,7 @@ class DecimalMutation(Mutation):
 		self._individual_class = [DecimalFloatIndividual, DecimalIntegerIndividual]
 
 	@staticmethod
-	def mutate_individual(individual, positions, alpha):
+	def mutate_individual(individual, positions, alpha, fun_evaluation=None):
 		'''
 		mutation method for decimal encoded individual:
 		to add a random deviation for gene in specified positions
@@ -64,16 +63,31 @@ class UniqueSeqMutation(Mutation):
 		# this operator is only available for UniqueSeqIndividual
 		self._individual_class = [UniqueSeqIndividual, UniqueLoopIndividual]
 
-	@staticmethod
-	def mutate_individual(individual, positions, alpha):
-		'''
-		exchange genes at specified positions:
-		- positions: 0-1 vector to specify positions for crossing
-		- alpha: additional param, ignored
-		'''
 
-		solution = copy.deepcopy(individual.solution)
-		# reorder genes at specified positions
-		solution[positions] = np.random.permutation(solution[positions])
-				
-		return solution
+	@staticmethod
+	def _mutate_positions(dimension):
+		'''select random and continuous positions'''
+		# start, end position
+		pos = np.random.choice(dimension, 2)
+		start, end = pos.min(), pos.max()
+		positions = np.zeros(dimension).astype(np.bool)
+		positions[start:end+1] = True
+		return positions
+
+	@staticmethod
+	def mutate_individual(individual, positions, alpha, fun_evaluation=None):
+		'''
+		reverse genes at specified positions:
+		- positions: 0-1 vector to specify positions
+		- alpha: probability to accept a worse solution
+		- fun_evaluation: objective function to assess current solution
+		'''
+		solution = individual.solution.copy()
+		# reverse genes at specified positions
+		solution[positions] = solution[positions][::-1]
+
+		if fun_evaluation(solution)<fun_evaluation(individual.solution):
+			res = solution
+		else:
+			res = individual.solution
+		return res
