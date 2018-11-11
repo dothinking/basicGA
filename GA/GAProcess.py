@@ -48,7 +48,7 @@ class GA():
 
 			# mutation
 			rate = 1.0 - np.random.rand()**((1.0-n/gen)**3)
-			self.mutation.mutate(self.population, rate, fun_evaluation)
+			self.mutation.mutate(self.population, rate)
 
 			# elitism mechanism: 
 			# set a random individual as the best in previous generation

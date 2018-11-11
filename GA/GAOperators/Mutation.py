@@ -75,19 +75,12 @@ class UniqueSeqMutation(Mutation):
 		return positions
 
 	@staticmethod
-	def mutate_individual(individual, positions, alpha, fun_evaluation=None):
+	def mutate_individual(individual, positions, alpha):
 		'''
 		reverse genes at specified positions:
 		- positions: 0-1 vector to specify positions
 		- alpha: probability to accept a worse solution
-		- fun_evaluation: objective function to assess current solution
 		'''
-		solution = individual.solution.copy()
-		# reverse genes at specified positions
-		solution[positions] = solution[positions][::-1]
-
-		if fun_evaluation(solution)<fun_evaluation(individual.solution):
-			res = solution
-		else:
-			res = individual.solution
-		return res
+		solution = individual.solution.copy()		
+		solution[positions] = solution[positions][::-1] # reverse genes at specified positions
+		return solution

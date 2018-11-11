@@ -128,15 +128,12 @@ class Mutation:
 		return self._individual_class	
 
 	@staticmethod
-	def mutate_individual(individual, positions, alpha, fun_evaluation=None):
+	def mutate_individual(individual, positions, alpha):
 		'''
         get mutated solution based on the selected individual:
             - individual: the selected individual
             - positions : 0-1 vector to specify positions for crossing
             - alpha: additional param
-            - fun_evaluation: objective function to evaluate the mutation results
-				it is not required by Simple Genetic Algorithm, but an optional method
-				to improve the algorithm by considering problem associated knowledge
             - return: the mutated solution
         '''
 		raise NotImplementedError
@@ -150,14 +147,13 @@ class Mutation:
 		positions[pos] = True
 		return positions
 	
-	def mutate(self, population, alpha=None, fun_evaluation=None):
+	def mutate(self, population, alpha=None):
 		'''
-		- population: population to be selected. 
-		
+		- population: population to be selected. 		
 		- alpha: additional params
 		'''
 		for individual in population.individuals:
 			if np.random.rand() > self._rate: continue
 			pos = self._mutate_positions(individual.dimension)
-			individual.solution = self.mutate_individual(individual, pos, alpha, fun_evaluation)			
+			individual.solution = self.mutate_individual(individual, pos, alpha)			
 			individual.init_evaluation() # reset evaluation
