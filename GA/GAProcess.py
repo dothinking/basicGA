@@ -21,7 +21,7 @@ class GA():
 		self.selection = selection
 		self.crossover = crossover
 		self.mutation = mutation
-		self.fun_fitness = fun_fitness if fun_fitness else lambda x:np.arctan(-x)+np.pi
+		self.fun_fitness = fun_fitness if fun_fitness else (lambda x:np.arctan(-x)+np.pi)
 
 	def run(self, fun_evaluation, gen=50):
 		'''
