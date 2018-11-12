@@ -57,9 +57,3 @@ if __name__ == '__main__':
 	T.plot_cities(plt)
 	T.plot_path(plt, T.solution)
 	plt.show()
-
-	x = np.arange(16).reshape((4,4))
-	x[2,0]=-1
-	print(x)
-
-	print(x[:,0].argmin())

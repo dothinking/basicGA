@@ -29,9 +29,8 @@ class TSPPopulation(Population):
 		'''initialization for next generation'''
 		super().initialize()
 
-		for I in self.individuals:
-			if np.random.rand()<5:
-				I.solution = self._two_opt(self._nearest_neighbor_path(), self.cities.distance)
+		for I in np.random.choice(self.individuals, int(self.size*0.2), replace=False):
+			I.solution = self._nearest_neighbor_path()
 
 	def best(self, fun_evaluation, fun_fitness):
 		'''
@@ -78,11 +77,11 @@ def test(cities, gen):
 	# GA process
 	I = UniqueLoopIndividual(cities.dimension)
 	P = TSPPopulation(cities, I, 50)
-	L = LinearRankingSelection()
+	L = LinearRankingSelection(200)
 	R = RouletteWheelSelection()
 	C = UniqueSeqCrossover([0.75, 0.95])
-	M = UniqueSeqMutation(0.2)
-	g = GA(P, R, C, M)
+	M = UniqueSeqMutation(0.15)
+	g = GA(P, R, C, M, lambda x:1/x**5)
 
 	# solve
 	res = g.run(cities.distance, gen)
@@ -92,12 +91,12 @@ def test(cities, gen):
 
 if __name__ == '__main__':
 
-	cities = TSPCities('dataset/eil51.tsp', 'dataset/eil51.opt.tour')
-	# cities = TSPCities('dataset/a280.tsp', 'dataset/a280.opt.tour')
+	# cities = TSPCities('dataset/eil51.tsp', 'dataset/eil51.opt.tour')
+	cities = TSPCities('dataset/a280.tsp', 'dataset/a280.opt.tour')
 
 	# build-in GA process
 	s1 = time.time()
-	res = test(cities, 200)
+	res = test(cities, 80)
 
 	# output
 	s2 = time.time()
