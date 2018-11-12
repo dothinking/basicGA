@@ -30,13 +30,23 @@ class TSPPopulation(Population):
 		super().initialize()
 
 		for I in self.individuals:
-			if np.random.rand()<0.5:
-				I.solution = self._nearest_neighbor_path()
+			if np.random.rand()<5:
+				I.solution = self._two_opt(self._nearest_neighbor_path(), self.cities.distance)
+
+	def best(self, fun_evaluation, fun_fitness):
+		'''
+		get best individual according to evaluation value,
+		then optimize it by 2-opt method
+		'''
+		the_best = super().best(fun_evaluation, fun_fitness)
+		the_best.solution = self._two_opt(the_best.solution.copy(), fun_evaluation)
+		the_best.evaluation = fun_evaluation(the_best.solution)
+		fitness = fun_fitness(the_best.evaluation)
+		the_best.fun_fitness = fitness/fitness.sum() # normalize
+		return the_best
 
 	def _nearest_neighbor_path(self):
 		D = self.cities.distances.copy()
-		D[D==0] = np.inf		
-
 		solution = np.zeros_like(self.individual.solution)
 		solution[0] = np.random.randint(self.individual.dimension)
 		D[solution[0],:] = np.inf
@@ -49,7 +59,7 @@ class TSPPopulation(Population):
 
 	def _two_opt(self, solution, fun_evaluation):
 	    count = 0		
-	    while count < 50:
+	    while count < 200:
 	    	pos = np.random.choice(self.individual.dimension, 2)
 	    	start, end = pos.min(), pos.max()
 
@@ -62,43 +72,6 @@ class TSPPopulation(Population):
 	    		count = 0
 	    		solution = new_solution
 	    return solution
-
-	def evaluate(self, fun_evaluation, fun_fitness):
-		'''
-		calculate objectibe value and fitness for each individual.
-		fun_evaluation	: objective function
-		fun_fitness  	: population fitness based on evaluation
-		'''
-
-		# get the value directly if it has been calculated before
-		for I in self.individuals:
-			I.solution = self._two_opt(I.solution, fun_evaluation)
-
-		evaluation = np.array([fun_evaluation(I.solution) for I in self.individuals])	
-
-		# calculate fitness
-		fitness = fun_fitness(evaluation)
-		fitness = fitness/fitness.sum() # normalize
-
-		# set attributes for each individual
-		for I, e, f in zip(self.individuals, evaluation, fitness):
-			I.evaluation = e
-			I.fitness = f
-
-		return fitness, evaluation
-
-
-	def best0(self, fun_evaluation, fun_fitness):
-		'''
-		get best individual according to evaluation value,
-		then optimize it by 2-opt method
-		'''
-		the_best = super().best(fun_evaluation, fun_fitness)
-		the_best.solution = self._two_opt(the_best.solution.copy(), fun_evaluation)
-		the_best.evaluation = fun_evaluation(the_best.solution)
-		fitness = fun_fitness(the_best.evaluation)
-		the_best.fun_fitness = fitness/fitness.sum() # normalize
-		return the_best
 
 def test(cities, gen):
 
@@ -120,10 +93,11 @@ def test(cities, gen):
 if __name__ == '__main__':
 
 	cities = TSPCities('dataset/eil51.tsp', 'dataset/eil51.opt.tour')
+	# cities = TSPCities('dataset/a280.tsp', 'dataset/a280.opt.tour')
 
 	# build-in GA process
 	s1 = time.time()
-	res = test(cities, 500)
+	res = test(cities, 200)
 
 	# output
 	s2 = time.time()

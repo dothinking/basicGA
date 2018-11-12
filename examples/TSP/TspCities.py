@@ -13,7 +13,9 @@ class TSPCities:
 	def init_distances(self):
 		X = self.cities[:,0].reshape((1,self.dimension))
 		Y = self.cities[:,1].reshape((1,self.dimension))
-		d = ((X-X.T)**2 + (Y-Y.T)**2)**0.5		
+		d = ((X-X.T)**2 + (Y-Y.T)**2)**0.5
+		pos = np.arange(self.dimension)
+		d[pos,pos] = np.inf
 		return d
 
 	def distance(self, tour):
@@ -49,7 +51,7 @@ if __name__ == '__main__':
 
 	import matplotlib.pyplot as plt
 
-	T = TSPCities('dataset/eil51.tsp', 'dataset/eil51.opt.tour')
+	T = TSPCities('dataset/a280.tsp', 'dataset/a280.opt.tour')
 	print(T.min_distance)
 
 	T.plot_cities(plt)
