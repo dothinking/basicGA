@@ -43,3 +43,29 @@ class LinearRankingSelection(Selection):
 		
 		return np.array([copy.deepcopy(I) for I in selected_individuals])
 
+
+class TournamentSelection(Selection):
+	'''
+	select individuals by tournament: each time select the best individual from k candidates
+	'''
+	def __init__(self, k=2):
+		'''
+		rate: probability ratio of the best individual to the worst
+			it shows the relative probability of the best/worst individual to be selected
+		'''
+		if not isinstance(k, int) and k<2:
+			raise ValueError('the candinates number should be integer larger than 1') 
+			
+		self.k = k
+
+	def select(self, population):
+		fitness = np.array([I.fitness for I in population.individuals])
+		count = 0
+		selected_individuals = []
+		while count < population.size:
+			count += 1
+			candidates = np.random.choice(population.individuals, self.k, replace=False)
+			winner = max(candidates, key=lambda I: I.fitness)
+			selected_individuals.append(winner)
+
+		return np.array([copy.deepcopy(I) for I in selected_individuals])
