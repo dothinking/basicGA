@@ -44,9 +44,9 @@ class DecimalCrossover(Crossover):
 		return new_individual_a, new_individual_b
 	
 
-class UniqueSeqCrossover(Crossover):
+class SequencePMXCrossover(Crossover):
 	'''
-	crossover operation for unique sequence individuals:
+	Partially Mapped Crossover Operator(https://doi.org/10.1155/2017/7430125):
 		- exchange genes at random positions
 		- adjust to avoid duplicated genes
 	'''
@@ -62,7 +62,7 @@ class UniqueSeqCrossover(Crossover):
 	@staticmethod
 	def cross_individuals(individual_a, individual_b, pos, alpha):
 		'''
-		generate two child individuals based on parent individuals:
+		Partially Mapped Crossover Operator(https://doi.org/10.1155/2017/7430125):
 			- pos  : 0-1 vector to specify positions for crossing
 			- alpha: not used
 		'''
