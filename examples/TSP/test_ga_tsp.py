@@ -3,6 +3,7 @@ import sys
 import time
 import matplotlib.pyplot as plt
 import numpy as np
+import multiprocessing
 
 script_path = os.path.abspath(__file__) # current script path
 package_path = os.path.dirname(os.path.dirname(os.path.dirname(script_path)))
@@ -12,7 +13,7 @@ sys.path.append(package_path)
 from GA.GAPopulation.SequenceIndividual import UniqueLoopIndividual
 from GA.GAPopulation.Population import Population
 from GA.GAOperators.Selection import RouletteWheelSelection, LinearRankingSelection
-from GA.GAOperators.Crossover import UniqueSeqCrossover
+from GA.GAOperators.Crossover import SequencePMXCrossover, SequenceOXCrossover
 from GA.GAOperators.Mutation import UniqueSeqMutation
 from GA.GAProcess import GA
 
@@ -32,17 +33,29 @@ class TSPPopulation(Population):
 		for I in np.random.choice(self.individuals, int(self.size*0.2), replace=False):
 			I.solution = self._nearest_neighbor_path()
 
-	def best(self, fun_evaluation, fun_fitness):
+	def evaluate(self, fun_evaluation, fun_fitness):
 		'''
-		get best individual according to evaluation value,
-		then optimize it by 2-opt method
+		calculate objectibe value and fitness for each individual.
+			- fun_evaluation: objective function
+			- fun_fitness  	: population fitness based on evaluation
 		'''
-		the_best = super().best(fun_evaluation, fun_fitness)
-		the_best.solution = self._two_opt(the_best.solution.copy(), fun_evaluation)
-		the_best.evaluation = fun_evaluation(the_best.solution)
-		fitness = fun_fitness(the_best.evaluation)
-		the_best.fun_fitness = fitness/fitness.sum() # normalize
-		return the_best
+		# optimize locally with 2-opt method
+		pool = multiprocessing.Pool(processes=4)
+		jobs = [pool.apply_async(self._two_opt, (I.solution, fun_evaluation)) for I in self.individuals]
+		pool.close()
+		pool.join()
+		solutions = [job.get() for job in jobs]
+
+		# calculate fitness
+		evaluation = np.array([fun_evaluation(solution) for solution in solutions])
+		fitness = fun_fitness(evaluation)
+		fitness = fitness/fitness.sum() # normalize
+		
+		# set attributes for each individual
+		for I, s, e, f in zip(self.individuals, solutions, evaluation, fitness):
+			I.solution = s
+			I.evaluation = e
+			I.fitness = f
 
 	def _nearest_neighbor_path(self):
 		D = self.cities.distances.copy()
@@ -58,7 +71,7 @@ class TSPPopulation(Population):
 
 	def _two_opt(self, solution, fun_evaluation):
 	    count = 0		
-	    while count < 200:
+	    while count < 50:
 	    	pos = np.random.choice(self.individual.dimension, 2)
 	    	start, end = pos.min(), pos.max()
 
@@ -76,12 +89,13 @@ def test(cities, gen):
 
 	# GA process
 	I = UniqueLoopIndividual(cities.dimension)
-	P = TSPPopulation(cities, I, 50)
+	P = TSPPopulation(cities, I, 32)
 	L = LinearRankingSelection(200)
 	R = RouletteWheelSelection()
-	C = UniqueSeqCrossover([0.75, 0.95])
+	C = SequencePMXCrossover([0.75, 0.95])
+	O = SequenceOXCrossover([0.75, 0.95])
 	M = UniqueSeqMutation(0.15)
-	g = GA(P, R, C, M, lambda x:1/x**5)
+	g = GA(P, R, O, M)
 
 	# solve
 	res = g.run(cities.distance, gen)
@@ -91,12 +105,12 @@ def test(cities, gen):
 
 if __name__ == '__main__':
 
-	# cities = TSPCities('dataset/eil51.tsp', 'dataset/eil51.opt.tour')
-	cities = TSPCities('dataset/a280.tsp', 'dataset/a280.opt.tour')
+	cities = TSPCities('dataset/eil51.tsp', 'dataset/eil51.opt.tour')
+	# cities = TSPCities('dataset/a280.tsp', 'dataset/a280.opt.tour')
 
 	# build-in GA process
 	s1 = time.time()
-	res = test(cities, 80)
+	res = test(cities, 100)
 
 	# output
 	s2 = time.time()
