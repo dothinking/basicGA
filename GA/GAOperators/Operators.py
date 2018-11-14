@@ -2,7 +2,7 @@
 # GA Operator Base Class: selection, crossover, mutation
 #----------------------------------------------------------
 import numpy as np
-
+import copy
 
 # SELECTION
 class Selection:
@@ -88,9 +88,7 @@ class Crossover:
 		new_individuals, count = [], 0
 		for individual_a, individual_b in zip(population.individuals, random_population):
 			# crossover
-			if np.random.rand() <= self._adaptive_rate(individual_a, individual_b, population) and \
-						not any(individual_a.solution-individual_b.solution):
-
+			if np.random.rand() <= self._adaptive_rate(individual_a, individual_b, population):
 				# random position to cross
 				pos = self._cross_positions(individual_a.dimension)
 				child_individuals = self.cross_individuals(individual_a, individual_b, pos, self._alpha)
@@ -98,8 +96,8 @@ class Crossover:
 
 			# skip crossover, but copy parents directly
 			else:
-				new_individuals.append(individual_a)
-				new_individuals.append(individual_b)
+				new_individuals.append(copy.deepcopy(individual_a))
+				new_individuals.append(copy.deepcopy(individual_b))
 
 			# generate two child at one crossover
 			count += 2
@@ -112,7 +110,7 @@ class Crossover:
 		# since same parent individuals for crossover would be ignored
 		# so when count < size, param `replace` for choice() is True,
 		# which means dupilcated individuals are necessary
-		return np.random.choice(new_individuals, population.size, replace=count<population.size)
+		return np.random.choice(new_individuals, population.size, replace=False)
 
 # MUTATION
 class Mutation:
