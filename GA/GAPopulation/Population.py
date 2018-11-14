@@ -3,6 +3,7 @@
 #----------------------------------------------------------
 import numpy as np
 
+
 class Population:
 	'''collection of individuals'''
 	def __init__(self, individual, size=50):
@@ -20,10 +21,12 @@ class Population:
 		IndvClass = self.individual.__class__
 		self.individuals = np.array([IndvClass(self.individual.ranges) for i in range(self.size)], dtype=IndvClass)
 
-	def best(self, fun_evaluation, fun_fitness):
-		'''get best individual according to evaluation value '''
-		# evaluate first and collect evaluations
-		_, evaluation = self.evaluate(fun_evaluation, fun_fitness)
+	@property
+	def best(self):
+		'''get best individual according to evaluation value'''
+		# collect evaluations
+		evaluation = np.array([I.evaluation for I in self.individuals])
+
 		# get the minimum position
 		pos = np.argmin(evaluation)
 		return self.individuals[pos]
@@ -31,12 +34,12 @@ class Population:
 	def evaluate(self, fun_evaluation, fun_fitness):
 		'''
 		calculate objectibe value and fitness for each individual.
-		fun_evaluation	: objective function
-		fun_fitness  	: population fitness based on evaluation
+			- fun_evaluation: objective function
+			- fun_fitness  	: population fitness based on evaluation
 		'''
 
 		# get the value directly if it has been calculated before
-		evaluation = np.array([fun_evaluation(I.solution) if I.evaluation is None else I.evaluation for I in self.individuals])
+		evaluation = np.array([fun_evaluation(I.solution) if I.evaluation is None else I.evaluation for I in self.individuals])		
 
 		# calculate fitness
 		fitness = fun_fitness(evaluation)
@@ -46,5 +49,3 @@ class Population:
 		for I, e, f in zip(self.individuals, evaluation, fitness):
 			I.evaluation = e
 			I.fitness = f
-
-		return fitness, evaluation

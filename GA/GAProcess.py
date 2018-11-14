@@ -37,8 +37,9 @@ class GA():
 		# solving process
 		for n in range(1, gen+1):
 
-			# the best individual in previous generation
-			the_best = copy.deepcopy(self.population.best(fun_evaluation, self.fun_fitness))
+			# evaluate and get the best individual in previous generation
+			self.population.evaluate(fun_evaluation, self.fun_fitness)
+			the_best = copy.deepcopy(self.population.best)
 
 			# selection
 			self.population.individuals = self.selection.select(self.population)
@@ -56,4 +57,5 @@ class GA():
 			self.population.individuals[pos] = the_best
 
 		# return the best individual
-		return self.population.best(fun_evaluation, self.fun_fitness)
+		self.population.evaluate(fun_evaluation, self.fun_fitness)
+		return self.population.best
