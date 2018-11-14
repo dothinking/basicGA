@@ -73,8 +73,8 @@ class SequencePMXCrossover(Crossover):
 		exchange_a, exchange_b = solution_a[pos], solution_b[pos]
 
 		# unique elements among the exchanged elements
-		diff_a = np.setdiff1d(exchange_a, exchange_b)
-		diff_b = np.setdiff1d(exchange_b, exchange_a)
+		diff_a = exchange_a[~np.isin(exchange_a, exchange_b)]
+		diff_b = exchange_b[~np.isin(exchange_b, exchange_a)]
 
 		# fix the duplicated elements
 		solution_a[np.isin(solution_a, diff_b)] = diff_a
@@ -89,5 +89,47 @@ class SequencePMXCrossover(Crossover):
 
 		new_individual_a.solution = solution_a
 		new_individual_b.solution = solution_b
+
+		return new_individual_a, new_individual_b
+
+
+class SequenceOXCrossover(Crossover):
+	'''
+	Order Crossover Operator(https://doi.org/10.1155/2017/7430125):
+		- exchange genes at random positions
+		- adjust to avoid duplicated genes
+	'''
+	def __init__(self, rate=0.8):
+		'''
+		crossover operation:
+			- rate: propability of crossover. adaptive rate when it is a list, e.g. [0.6,0.9]
+		'''
+		super().__init__(rate)
+		self._individual_class = [UniqueSeqIndividual, UniqueLoopIndividual]
+
+
+	@staticmethod
+	def cross_individuals(individual_a, individual_b, pos, alpha):
+		'''
+		Partially Mapped Crossover Operator(https://doi.org/10.1155/2017/7430125):
+			- pos  : 0-1 vector to specify positions for crossing
+			- alpha: not used
+		'''
+		solution_a = individual_a.solution
+		solution_b = individual_b.solution
+
+		# elements to be exchanged
+		exchange_a, exchange_b = solution_a[pos], solution_b[pos]
+
+		# unique elements
+		unique_a = solution_a[~np.isin(solution_a, exchange_b)]
+		unique_b = solution_b[~np.isin(solution_b, exchange_a)]
+
+		# return new individuals
+		new_individual_a = individual_a.__class__(individual_a.ranges)
+		new_individual_b = individual_b.__class__(individual_b.ranges)
+
+		new_individual_a.solution = np.concatenate((exchange_b, unique_a))
+		new_individual_b.solution = np.concatenate((exchange_a, unique_b))
 
 		return new_individual_a, new_individual_b
