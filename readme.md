@@ -1,4 +1,4 @@
-# Practise Genetic Algorithm in Python
+# Practise Genetic Algorithm in Python [![Build Status](https://travis-ci.com/dothinking/basicGA.svg?branch=master)](https://travis-ci.com/dothinking/basicGA)
 
 - single-objective minimization
 - built-in Individual and Operators for mathematical functions, travelling salesman problem

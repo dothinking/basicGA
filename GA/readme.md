@@ -48,9 +48,11 @@ Three kinds of operators, `Selection`, `Crossover`, `Mutation`, are considered. 
 
 - `RouletteWheelSelection`: select individuals by Roulette Wheel with a probability of their fitness
 - `LinearRankingSelection`: select individuals by Roulette Wheel with a probability of their ranking postions
+- `TournamentSelection`: select individuals by tournament
 
 - `DecimalCrossover`: linear interpolation for decimal encoded individuals
-- `UniqueSeqCrossover`: exchange genes for unique sequence individuals
+- `SequencePMXCrossover`: Partially Mapped Crossover for unique sequence individuals
+- `SequenceOXCrossover`: Order Crossover for unique sequence individuals
 
 - `DecimalMutation`: add random deviations for decimal encoded individuals
 - `UniqueSeqMutation`: exchange genes for unique sequence individuals
