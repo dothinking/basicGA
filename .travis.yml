@@ -8,5 +8,9 @@ install:
 
 # command to run tests
 script:
-  - cd examples/TSP
+  - echo "testing GA for function optimization..." 
+  - cd examples/test_functions
+  - python test.py
+  - echo "testing GA for Travelling Saleman Problem..."
+  - cd ../TSP
   - python test_ga_tsp.py

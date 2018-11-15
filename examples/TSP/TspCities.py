@@ -1,6 +1,5 @@
 import numpy as np
 
-
 class TSPCities:
 	"""TSP data set"""
 	def __init__(self, filename, sol_filename=None):

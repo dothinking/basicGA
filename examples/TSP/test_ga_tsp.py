@@ -32,7 +32,7 @@ class TSPPopulation(Population):
 		for I in np.random.choice(self.individuals, int(self.size*0.2), replace=False):
 			I.solution = self._nearest_neighbor_path()
 
-	def evaluate0(self, fun_evaluation, fun_fitness):
+	def evaluate(self, fun_evaluation, fun_fitness):
 		'''
 		calculate objectibe value and fitness for each individual.
 			- fun_evaluation: objective function
@@ -56,7 +56,7 @@ class TSPPopulation(Population):
 			I.evaluation = e
 			I.fitness = f
 
-	def evaluate(self, fun_evaluation, fun_fitness):
+	def evaluate0(self, fun_evaluation, fun_fitness):
 		'''
 		calculate objectibe value and fitness for each individual.
 			- fun_evaluation: objective function
@@ -130,7 +130,7 @@ if __name__ == '__main__':
 
 	# build-in GA process
 	s1 = time.time()
-	res = test(cities, 50)
+	res = test(cities, 80)
 
 	# output
 	s2 = time.time()
