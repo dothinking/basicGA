@@ -1,7 +1,6 @@
 import os
 import sys
 import time
-import matplotlib.pyplot as plt
 import numpy as np
 import multiprocessing
 
@@ -33,7 +32,7 @@ class TSPPopulation(Population):
 		for I in np.random.choice(self.individuals, int(self.size*0.2), replace=False):
 			I.solution = self._nearest_neighbor_path()
 
-	def evaluate(self, fun_evaluation, fun_fitness):
+	def evaluate0(self, fun_evaluation, fun_fitness):
 		'''
 		calculate objectibe value and fitness for each individual.
 			- fun_evaluation: objective function
@@ -46,6 +45,25 @@ class TSPPopulation(Population):
 		pool.join()
 		solutions = [job.get() for job in jobs]
 
+		# calculate fitness
+		evaluation = np.array([fun_evaluation(solution) for solution in solutions])
+		fitness = fun_fitness(evaluation)
+		fitness = fitness/fitness.sum() # normalize
+		
+		# set attributes for each individual
+		for I, s, e, f in zip(self.individuals, solutions, evaluation, fitness):
+			I.solution = s
+			I.evaluation = e
+			I.fitness = f
+
+	def evaluate(self, fun_evaluation, fun_fitness):
+		'''
+		calculate objectibe value and fitness for each individual.
+			- fun_evaluation: objective function
+			- fun_fitness  	: population fitness based on evaluation
+		'''
+		# optimize locally with 2-opt method
+		solutions = [self._two_opt(I.solution, fun_evaluation) for I in self.individuals]
 		# calculate fitness
 		evaluation = np.array([fun_evaluation(solution) for solution in solutions])
 		fitness = fun_fitness(evaluation)
@@ -71,7 +89,7 @@ class TSPPopulation(Population):
 
 	def _two_opt(self, solution, fun_evaluation):
 	    count = 0		
-	    while count < 50:
+	    while count < 100:
 	    	pos = np.random.choice(self.individual.dimension, 2)
 	    	start, end = pos.min(), pos.max()
 
@@ -105,12 +123,14 @@ def test(cities, gen):
 
 if __name__ == '__main__':
 
+	# import matplotlib.pyplot as plt
+
 	cities = TSPCities('dataset/eil51.tsp', 'dataset/eil51.opt.tour')
 	# cities = TSPCities('dataset/a280.tsp', 'dataset/a280.opt.tour')
 
 	# build-in GA process
 	s1 = time.time()
-	res = test(cities, 100)
+	res = test(cities, 50)
 
 	# output
 	s2 = time.time()
@@ -118,7 +138,7 @@ if __name__ == '__main__':
 	print('TSP based GA solution: {0} in {1} seconds'.format(res.evaluation, s2-s1))
 
 	# plot
-	cities.plot_cities(plt)
-	cities.plot_path(plt, cities.solution)
-	cities.plot_path(plt, res.solution)
-	plt.show()
+	# cities.plot_cities(plt)
+	# cities.plot_path(plt, cities.solution)
+	# cities.plot_path(plt, res.solution)
+	# plt.show()
