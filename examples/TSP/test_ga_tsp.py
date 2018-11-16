@@ -125,12 +125,12 @@ if __name__ == '__main__':
 
 	# import matplotlib.pyplot as plt
 
-	cities = TSPCities('dataset/eil51.tsp', 'dataset/eil51.opt.tour')
-	# cities = TSPCities('dataset/a280.tsp', 'dataset/a280.opt.tour')
+	# cities = TSPCities('dataset/eil51.tsp', 'dataset/eil51.opt.tour')
+	cities = TSPCities('dataset/a280.tsp', 'dataset/a280.opt.tour')
 
 	# build-in GA process
 	s1 = time.time()
-	res = test(cities, 80)
+	res = test(cities, 100)
 
 	# output
 	s2 = time.time()
