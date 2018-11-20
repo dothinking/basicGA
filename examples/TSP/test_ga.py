@@ -12,7 +12,7 @@ sys.path.append(package_path)
 from GA.GAPopulation.SequenceIndividual import UniqueLoopIndividual
 from GA.GAPopulation.Population import Population
 from GA.GAOperators.Selection import RouletteWheelSelection, LinearRankingSelection
-from GA.GAOperators.Crossover import UniqueSeqCrossover
+from GA.GAOperators.Crossover import SequencePMXCrossover
 from GA.GAOperators.Mutation import UniqueSeqMutation
 from GA.GAProcess import GA
 
@@ -24,7 +24,7 @@ def test(cities, gen):
 	I = UniqueLoopIndividual(cities.dimension)
 	P = Population(I, 50)
 	L = LinearRankingSelection(500)
-	C = UniqueSeqCrossover([0.6, 0.9])
+	C = SequencePMXCrossover([0.6, 0.9])
 	M = UniqueSeqMutation(0.2)
 	g = GA(P, L, C, M)
 
