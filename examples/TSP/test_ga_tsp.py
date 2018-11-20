@@ -77,7 +77,7 @@ def test(cities, gen):
 
 if __name__ == '__main__':
 
-	import matplotlib.pyplot as plt
+	# import matplotlib.pyplot as plt
 
 	# cities = TSPCities('dataset/eil51.tsp', 'dataset/eil51.opt.tour')
 	cities = TSPCities('dataset/a280.tsp', 'dataset/a280.opt.tour')
@@ -92,7 +92,7 @@ if __name__ == '__main__':
 	print('TSP based GA solution: {0} in {1} seconds'.format(res.evaluation, s2-s1))
 
 	# plot
-	cities.plot_cities(plt)
-	cities.plot_path(plt, cities.solution)
-	cities.plot_path(plt, res.solution)
-	plt.show()
+	# cities.plot_cities(plt)
+	# cities.plot_path(plt, cities.solution)
+	# cities.plot_path(plt, res.solution)
+	# plt.show()
