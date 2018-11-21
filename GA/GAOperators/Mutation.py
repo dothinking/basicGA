@@ -68,7 +68,7 @@ class UniqueSeqMutation(Mutation):
 	def _mutate_positions(dimension):
 		'''select random and continuous positions'''
 		# start, end position
-		pos = np.random.choice(dimension, 2)
+		pos = np.random.choice(dimension, 2, replace=False)
 		start, end = pos.min(), pos.max()
 		positions = np.zeros(dimension).astype(np.bool)
 		positions[start:end+1] = True
